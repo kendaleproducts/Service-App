@@ -18,12 +18,12 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="block bg-white border border-slate-200 rounded-lg p-4 hover:border-slate-300 transition-colors"
+      className="block bg-white border border-stone-200 rounded-lg p-4 hover:border-stone-300 transition-colors"
     >
-      <p className="text-sm text-slate-500">{label}</p>
+      <p className="text-sm text-stone-500">{label}</p>
       <p
         className={`text-3xl font-semibold mt-1 ${
-          highlight && value > 0 ? "text-red-600" : "text-slate-900"
+          highlight && value > 0 ? "text-hickory" : "text-charcoal"
         }`}
       >
         {value}
@@ -38,8 +38,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-semibold text-charcoal">Dashboard</h1>
+        <p className="text-sm text-stone-500 mt-1">
           Mary Brown&apos;s service operations, managed from Fort Erie, ON.
         </p>
       </div>
@@ -66,19 +66,19 @@ export default async function DashboardPage() {
         <StatCard label="Active Locations" value={stats.totalLocations} href="/locations" />
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-lg">
-        <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-          <h2 className="font-medium text-slate-900">Recent Service Requests</h2>
-          <Link href="/service-requests" className="text-sm text-slate-500 hover:text-slate-900">
+      <div className="bg-white border border-stone-200 rounded-lg">
+        <div className="px-4 py-3 border-b border-stone-200 flex items-center justify-between">
+          <h2 className="font-medium text-charcoal">Recent Service Requests</h2>
+          <Link href="/service-requests" className="text-sm text-stone-500 hover:text-hotsauce">
             View all
           </Link>
         </div>
         {stats.recentRequests.length === 0 ? (
-          <p className="px-4 py-6 text-sm text-slate-500">No service requests yet.</p>
+          <p className="px-4 py-6 text-sm text-stone-500">No service requests yet.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-slate-500 border-b border-slate-100">
+              <tr className="text-left text-stone-500 border-b border-stone-100">
                 <th className="px-4 py-2 font-medium">Location</th>
                 <th className="px-4 py-2 font-medium">Issue</th>
                 <th className="px-4 py-2 font-medium">Status</th>
@@ -90,14 +90,14 @@ export default async function DashboardPage() {
               {stats.recentRequests.map((r) => (
                 <tr
                   key={r.id}
-                  className="border-b border-slate-50 last:border-0 hover:bg-slate-50"
+                  className="border-b border-stone-50 last:border-0 hover:bg-stone-50"
                 >
                   <td className="px-4 py-2">
-                    <Link href={`/service-requests/${r.id}`} className="text-slate-900 hover:underline">
+                    <Link href={`/service-requests/${r.id}`} className="text-charcoal hover:underline">
                       #{r.store_number} {r.location_name}
                     </Link>
                   </td>
-                  <td className="px-4 py-2 text-slate-600 max-w-xs truncate">
+                  <td className="px-4 py-2 text-stone-600 max-w-xs truncate">
                     {r.issue_description}
                   </td>
                   <td className="px-4 py-2">
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
                   <td className="px-4 py-2">
                     <Badge label={r.priority} />
                   </td>
-                  <td className="px-4 py-2 text-slate-600">
+                  <td className="px-4 py-2 text-stone-600">
                     {r.service_company_name ?? "—"}
                   </td>
                 </tr>

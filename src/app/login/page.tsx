@@ -1,3 +1,4 @@
+import FlameMark from "@/components/FlameMark";
 import { login } from "./actions";
 
 export default async function LoginPage({
@@ -10,35 +11,38 @@ export default async function LoginPage({
   const next = params.next ?? "/";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm bg-white border border-slate-200 rounded-lg shadow-sm p-8">
-        <h1 className="text-xl font-semibold text-slate-900 mb-1">Service Tracker</h1>
-        <p className="text-sm text-slate-500 mb-6">Fort Erie Service Operations</p>
-        <form action={login} className="space-y-4">
-          <input type="hidden" name="next" value={next} />
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoFocus
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-            />
-          </div>
-          {hasError && (
-            <p className="text-sm text-red-600">Incorrect password. Try again.</p>
-          )}
-          <button
-            type="submit"
-            className="w-full rounded-md bg-slate-900 text-white text-sm font-medium py-2 hover:bg-slate-800 transition-colors"
-          >
-            Sign in
-          </button>
-        </form>
+    <div className="min-h-screen flex items-center justify-center bg-charcoal px-4">
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col items-center mb-6">
+          <FlameMark className="h-10 w-10 mb-3" />
+          <h1 className="text-xl font-heading font-medium text-white">Service Tracker</h1>
+          <p className="text-sm text-white/50 mt-1">Kendale Products Ltd &middot; Fort Erie, ON</p>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm p-8">
+          <form action={login} className="space-y-4">
+            <input type="hidden" name="next" value={next} />
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-1">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                autoFocus
+                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+              />
+            </div>
+            {hasError && <p className="text-sm text-hickory">Incorrect password. Try again.</p>}
+            <button
+              type="submit"
+              className="w-full rounded-md bg-hotsauce text-white text-sm font-medium py-2 hover:bg-hickory transition-colors"
+            >
+              Sign in
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

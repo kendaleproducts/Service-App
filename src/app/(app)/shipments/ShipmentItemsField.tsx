@@ -9,14 +9,14 @@ export default function ShipmentItemsField({ parts }: { parts: Part[] }) {
 
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-medium text-slate-500">Parts</label>
+      <label className="block text-xs font-medium text-stone-500">Parts</label>
       {rows.map((key) => (
         <div key={key} className="flex gap-2">
           <select
             name="part_id"
             required
             defaultValue=""
-            className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm"
           >
             <option value="" disabled>
               Select a part...
@@ -33,13 +33,13 @@ export default function ShipmentItemsField({ parts }: { parts: Part[] }) {
             min={1}
             defaultValue={1}
             required
-            className="w-24 rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="w-24 rounded-md border border-stone-300 px-3 py-2 text-sm"
           />
           {rows.length > 1 && (
             <button
               type="button"
               onClick={() => setRows((r) => r.filter((k) => k !== key))}
-              className="text-sm text-slate-400 hover:text-red-600 px-2"
+              className="text-sm text-stone-400 hover:text-hickory px-2"
             >
               ✕
             </button>
@@ -52,7 +52,7 @@ export default function ShipmentItemsField({ parts }: { parts: Part[] }) {
           setRows((r) => [...r, nextKey]);
           setNextKey((k) => k + 1);
         }}
-        className="text-sm text-slate-600 hover:text-slate-900"
+        className="text-sm text-stone-600 hover:text-hotsauce"
       >
         + Add another part
       </button>

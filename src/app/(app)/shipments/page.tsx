@@ -11,21 +11,21 @@ export default async function ShipmentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Parts Shipments</h1>
-          <p className="text-sm text-slate-500 mt-1">{shipments.length} shipment(s)</p>
+          <h1 className="text-2xl font-semibold text-charcoal">Parts Shipments</h1>
+          <p className="text-sm text-stone-500 mt-1">{shipments.length} shipment(s)</p>
         </div>
         <Link
           href="/shipments/new"
-          className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-md bg-hotsauce px-3 py-2 text-sm font-medium text-white hover:bg-hickory"
         >
           Ship Parts
         </Link>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+      <div className="bg-white border border-stone-200 rounded-lg overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-slate-500 border-b border-slate-100">
+            <tr className="text-left text-stone-500 border-b border-stone-100">
               <th className="px-4 py-2 font-medium">Shipment</th>
               <th className="px-4 py-2 font-medium">Destination</th>
               <th className="px-4 py-2 font-medium">Carrier / Tracking</th>
@@ -35,29 +35,29 @@ export default async function ShipmentsPage() {
           </thead>
           <tbody>
             {shipments.map((s) => (
-              <tr key={s.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
+              <tr key={s.id} className="border-b border-stone-50 last:border-0 hover:bg-stone-50">
                 <td className="px-4 py-2">
-                  <Link href={`/shipments/${s.id}`} className="text-slate-900 hover:underline">
+                  <Link href={`/shipments/${s.id}`} className="text-charcoal hover:underline">
                     #{s.id}
                   </Link>
                 </td>
-                <td className="px-4 py-2 text-slate-600">
+                <td className="px-4 py-2 text-stone-600">
                   {s.location_name ?? s.service_company_name ?? "—"}
                 </td>
-                <td className="px-4 py-2 text-slate-600">
+                <td className="px-4 py-2 text-stone-600">
                   {s.carrier ?? "—"} {s.tracking_number ? `· ${s.tracking_number}` : ""}
                 </td>
                 <td className="px-4 py-2">
                   <Badge label={s.status} />
                 </td>
-                <td className="px-4 py-2 text-slate-600">
+                <td className="px-4 py-2 text-stone-600">
                   {new Date(s.created_at).toLocaleDateString()}
                 </td>
               </tr>
             ))}
             {shipments.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={5} className="px-4 py-8 text-center text-stone-500">
                   No shipments yet.
                 </td>
               </tr>

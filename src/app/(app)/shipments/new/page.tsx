@@ -23,28 +23,28 @@ export default async function NewShipmentPage({
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold text-slate-900">Ship Parts</h1>
-      <form action={createShipmentAction} className="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+      <h1 className="text-2xl font-semibold text-charcoal">Ship Parts</h1>
+      <form action={createShipmentAction} className="bg-white border border-stone-200 rounded-lg p-5 space-y-4">
         {serviceRequestId && (
           <input type="hidden" name="service_request_id" value={serviceRequestId} />
         )}
         {serviceRequest && (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-stone-500">
             Linked to service request #{serviceRequest.id} — {serviceRequest.location_name}
           </p>
         )}
 
         <ShipmentItemsField parts={parts} />
 
-        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-stone-100">
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">
+            <label className="block text-xs font-medium text-stone-500 mb-1">
               Ship to Location
             </label>
             <select
               name="location_id"
               defaultValue={serviceRequest?.location_id ?? ""}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
             >
               <option value="">— None —</option>
               {locations.map((l) => (
@@ -55,13 +55,13 @@ export default async function NewShipmentPage({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">
+            <label className="block text-xs font-medium text-stone-500 mb-1">
               Or Ship to Service Company
             </label>
             <select
               name="service_company_id"
               defaultValue=""
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
             >
               <option value="">— None —</option>
               {companies.map((c) => (
@@ -72,28 +72,28 @@ export default async function NewShipmentPage({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Carrier</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">Carrier</label>
             <input
               name="carrier"
               placeholder="e.g. Canada Post, Purolator"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">
+            <label className="block text-xs font-medium text-stone-500 mb-1">
               Tracking Number
             </label>
             <input
               name="tracking_number"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Status</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">Status</label>
             <select
               name="status"
               defaultValue="Preparing"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
             >
               {SHIPMENT_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -103,18 +103,18 @@ export default async function NewShipmentPage({
             </select>
           </div>
           <div className="col-span-2">
-            <label className="block text-xs font-medium text-slate-500 mb-1">Notes</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">Notes</label>
             <textarea
               name="notes"
               rows={2}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
             />
           </div>
         </div>
 
         <button
           type="submit"
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-md bg-hotsauce px-4 py-2 text-sm font-medium text-white hover:bg-hickory"
         >
           Create Shipment
         </button>
