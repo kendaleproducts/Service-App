@@ -9,7 +9,7 @@ export default async function ShipmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-charcoal">Parts Shipments</h1>
           <p className="text-sm text-stone-500 mt-1">{shipments.length} shipment(s)</p>
@@ -22,7 +22,7 @@ export default async function ShipmentsPage() {
         </Link>
       </div>
 
-      <div className="bg-white border border-stone-200 rounded-lg overflow-hidden">
+      <div className="bg-white border border-stone-200 rounded-lg overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-stone-500 border-b border-stone-100">

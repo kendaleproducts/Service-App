@@ -20,12 +20,12 @@ export default async function LocationsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-charcoal">Locations</h1>
           <p className="text-sm text-stone-500 mt-1">{locations.length} location(s)</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link
             href="/locations/import"
             className="rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
@@ -81,7 +81,7 @@ export default async function LocationsPage({
         </button>
       </form>
 
-      <div className="bg-white border border-stone-200 rounded-lg overflow-hidden">
+      <div className="bg-white border border-stone-200 rounded-lg overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-stone-500 border-b border-stone-100">

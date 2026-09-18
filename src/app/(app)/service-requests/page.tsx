@@ -15,7 +15,7 @@ export default async function ServiceRequestsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-charcoal">Service Requests</h1>
           <p className="text-sm text-stone-500 mt-1">{requests.length} request(s)</p>
@@ -61,7 +61,7 @@ export default async function ServiceRequestsPage({
         </button>
       </form>
 
-      <div className="bg-white border border-stone-200 rounded-lg overflow-hidden">
+      <div className="bg-white border border-stone-200 rounded-lg overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-stone-500 border-b border-stone-100">

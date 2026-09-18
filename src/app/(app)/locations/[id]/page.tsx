@@ -21,7 +21,7 @@ export default async function LocationDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm text-stone-500">Store #{location.store_number}</p>
           <h1 className="text-2xl font-semibold text-charcoal">{location.name}</h1>
