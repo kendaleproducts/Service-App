@@ -105,7 +105,7 @@ function ensureFryerParts() {
 
 function ensureFryerServiceCompany() {
   const existing = db
-    .prepare("SELECT * FROM service_companies WHERE name LIKE '%Fryer%' OR name LIKE '%Broaster%'")
+    .prepare("SELECT * FROM service_companies WHERE name LIKE '%Kendale%'")
     .get();
   if (existing) return existing.id;
 
@@ -115,12 +115,12 @@ function ensureFryerServiceCompany() {
        VALUES (?, ?, ?, ?, ?, ?)`
     )
     .run(
-      "Broaster Factory-Certified Service",
-      "Rick Halloran",
-      "1-855-555-0177",
-      "dispatch@broasterservice.example",
+      "Kendale Products Limited",
+      "Service Dispatch",
+      "1-888-887-9923",
+      "service@kendale.ca",
       "Canada-wide",
-      "Certified for electric pressure fryer repair, calibration, and PM."
+      "Coordinates all Mary Brown's service calls from Fort Erie, ON and dispatches technicians as needed."
     );
   return info.lastInsertRowid;
 }
