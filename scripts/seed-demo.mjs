@@ -1,7 +1,9 @@
-// Populates the database with realistic demo data for testing and sales
-// demos: a few service companies, parts (including one low-stock item),
-// service requests across different statuses/priorities, a timeline note,
-// and a shipment. Safe to re-run — each section only inserts if empty.
+// Layers general demo data on top of REAL imported locations: a few service
+// companies, parts (including one low-stock item), and service requests
+// across different equipment types, statuses, and priorities. Locations are
+// never fabricated — this only reads real ones already in the database.
+//
+// Run "Locations -> Import from Excel" FIRST so real stores exist.
 //
 // Usage: npm run seed:demo
 
@@ -18,33 +20,28 @@ const db = new Database(path.join(dataDir, "app.db"));
 db.pragma("foreign_keys = ON");
 db.exec(fs.readFileSync(path.join(process.cwd(), "src", "lib", "schema.sql"), "utf-8"));
 
-function getOrCreateCustomer(name) {
-  const existing = db.prepare("SELECT * FROM customers WHERE name = ?").get(name);
-  if (existing) return existing;
-  const info = db.prepare("INSERT INTO customers (name) VALUES (?)").run(name);
-  return db.prepare("SELECT * FROM customers WHERE id = ?").get(info.lastInsertRowid);
+const locationCount = db.prepare("SELECT COUNT(*) as c FROM locations").get().c;
+if (locationCount === 0) {
+  console.error(
+    "No locations found. Import the real spreadsheet first (Locations -> Import from Excel), then re-run this script."
+  );
+  process.exit(1);
 }
 
-function ensureLocations(customerId) {
-  const count = db.prepare("SELECT COUNT(*) as c FROM locations").get().c;
-  if (count > 0) return;
-
-  const seedLocations = [
-    { store_number: "1001", name: "Millbrook Mall", city: "Corner Brook", province: "NL" },
-    { store_number: "1010", name: "Avalon Mall", city: "St. John's", province: "NL" },
-    { store_number: "3050", name: "Yonge & Eglinton", city: "Toronto", province: "ON" },
-    { store_number: "4020", name: "Polo Park", city: "Winnipeg", province: "MB" },
-    { store_number: "5015", name: "Chinook Centre", city: "Calgary", province: "AB" },
-    { store_number: "6005", name: "Metrotown", city: "Burnaby", province: "BC" },
-  ];
-
-  const insert = db.prepare(
-    `INSERT INTO locations (customer_id, store_number, name, ownership, status, city, province)
-     VALUES (@customer_id, @store_number, @name, 'Franchise', 'Open', @city, @province)`
-  );
-  for (const loc of seedLocations) {
-    insert.run({ customer_id: customerId, ...loc });
-  }
+function pickDiverseLocations(limit) {
+  return db
+    .prepare(
+      `SELECT l.* FROM locations l
+       JOIN (
+         SELECT province, MIN(id) as id
+         FROM locations
+         WHERE status = 'Open'
+         GROUP BY province
+       ) picked ON picked.id = l.id
+       ORDER BY l.province
+       LIMIT ?`
+    )
+    .all(limit);
 }
 
 function ensureCompanies() {
@@ -128,8 +125,12 @@ function ensureServiceRequests() {
   const count = db.prepare("SELECT COUNT(*) as c FROM service_requests").get().c;
   if (count > 0) return;
 
-  const locationByStore = (storeNumber) =>
-    db.prepare("SELECT * FROM locations WHERE store_number = ?").get(storeNumber);
+  const locations = pickDiverseLocations(4);
+  if (locations.length === 0) {
+    console.error("No open locations found to attach demo requests to.");
+    return;
+  }
+
   const companyByName = (fragment) =>
     db.prepare("SELECT * FROM service_companies WHERE name LIKE ?").get(`%${fragment}%`);
   const partByNumber = (partNumber) =>
@@ -147,7 +148,7 @@ function ensureServiceRequests() {
   );
 
   const req1 = insertRequest.run({
-    location_id: locationByStore("1001").id,
+    location_id: locations[0].id,
     service_company_id: atlantic.id,
     status: "In Progress",
     priority: "Urgent",
@@ -167,7 +168,7 @@ function ensureServiceRequests() {
       `INSERT INTO part_shipments (service_request_id, location_id, carrier, tracking_number, status, shipped_at)
        VALUES (?, ?, 'Canada Post', 'CP123456789CA', 'Shipped', datetime('now'))`
     )
-    .run(req1, locationByStore("1001").id).lastInsertRowid;
+    .run(req1, locations[0].id).lastInsertRowid;
   db.prepare(
     "INSERT INTO part_shipment_items (part_shipment_id, part_id, quantity) VALUES (?, ?, 1)"
   ).run(shipmentId, fryerThermostat.id);
@@ -176,7 +177,7 @@ function ensureServiceRequests() {
   ).run(fryerThermostat.id);
 
   insertRequest.run({
-    location_id: locationByStore("4020").id,
+    location_id: locations[1 % locations.length].id,
     service_company_id: prairie.id,
     status: "Scheduled",
     priority: "Normal",
@@ -186,7 +187,7 @@ function ensureServiceRequests() {
   });
 
   insertRequest.run({
-    location_id: locationByStore("6005").id,
+    location_id: locations[2 % locations.length].id,
     service_company_id: western.id,
     status: "New",
     priority: "High",
@@ -196,7 +197,7 @@ function ensureServiceRequests() {
   });
 
   insertRequest.run({
-    location_id: locationByStore("1010").id,
+    location_id: locations[3 % locations.length].id,
     service_company_id: atlantic.id,
     status: "Completed",
     priority: "Low",
@@ -206,8 +207,6 @@ function ensureServiceRequests() {
   });
 }
 
-const customer = getOrCreateCustomer("Mary Brown's");
-ensureLocations(customer.id);
 ensureCompanies();
 ensureParts();
 ensureServiceRequests();

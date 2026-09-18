@@ -25,13 +25,14 @@ Open http://localhost:3000 and sign in with the password from `.env.local`.
 
 ### Demo data
 
-For testing or a sales demo, populate the database with a realistic sample set (a handful of locations across the country, service companies, parts including a low-stock item, and service requests across every status/priority):
+Both seed scripts require real locations to already exist — **import the real spreadsheet first** (Locations → Import from Excel), then layer demo data on top. Neither script ever fabricates a location; only the store data you actually import is used. Service companies, parts, and service requests they create are made up for demo purposes (you don't have real contracted vendors on file yet).
 
 ```bash
-npm run seed:demo
+npm run seed:demo     # general demo: a few vendors, misc equipment parts, requests across every status/priority
+npm run seed:fryers   # Mary Brown's-specific: electric pressure fryer parts and failure scenarios
 ```
 
-Safe to re-run — it only inserts if each table is empty. To start over, stop the app and delete the `data/` folder, then re-run `npm run seed:demo`. For a real deployment, use **Locations → Import from Excel** instead to load actual store data.
+Both are safe to re-run — each only inserts if its data doesn't already exist. To start over completely, stop the app, delete the `data/` folder, re-import the spreadsheet, then re-run whichever seed script you want.
 
 ### Environment variables
 
