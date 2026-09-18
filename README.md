@@ -23,6 +23,16 @@ npm run dev
 
 Open http://localhost:3000 and sign in with the password from `.env.local`.
 
+### Demo data
+
+For testing or a sales demo, populate the database with a realistic sample set (a handful of locations across the country, service companies, parts including a low-stock item, and service requests across every status/priority):
+
+```bash
+npm run seed:demo
+```
+
+Safe to re-run — it only inserts if each table is empty. To start over, stop the app and delete the `data/` folder, then re-run `npm run seed:demo`. For a real deployment, use **Locations → Import from Excel** instead to load actual store data.
+
 ### Environment variables
 
 | Variable | Purpose |
