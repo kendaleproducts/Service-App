@@ -29,8 +29,9 @@ Open http://localhost:3000 and sign in with the password from `.env.local`.
 |---|---|
 | `ADMIN_PASSWORD` | The single shared password staff use to sign in |
 | `SESSION_SECRET` | Random string used to sign session cookies. Generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `DATA_DIR` | Optional. Where the SQLite file is stored. Defaults to `./data`. Set this to point at a mounted persistent volume when deploying (see below). |
 
-Both are required — the app will throw on first use if either is missing.
+`ADMIN_PASSWORD` and `SESSION_SECRET` are required — the app will throw on first use if either is missing.
 
 ## Data model
 
@@ -52,8 +53,33 @@ Go to **Locations → Import from Excel** and upload the head office spreadsheet
 
 Re-running the import with an updated spreadsheet is safe — it's an upsert, not a wipe-and-reload.
 
-## Deployment notes
+## Deployment
 
-This is designed to run as a single long-lived Node process (e.g. `npm run build && npm run start` on a small VM, or any host that supports a persistent Node server — not a serverless/edge-only platform, since it needs a writable local disk for the SQLite file at `data/app.db`).
+This runs as a single long-lived Node process, not a serverless function — it needs a writable local disk for the SQLite file. **Serverless hosts like Vercel will not work**: their filesystem doesn't persist between requests, so the database would reset constantly. Use a host that runs an always-on server with a persistent volume. Once deployed, the app works from any device with a browser and an internet connection — phone, tablet, or desktop, on WiFi or cellular — no native app required.
 
-Back up `data/app.db` regularly — it's the entire database.
+### Railway (recommended)
+
+1. Push this repo to GitHub (already done if you're reading this on the repo).
+2. At [railway.app](https://railway.app), **New Project → Deploy from GitHub repo**, pick this repo/branch.
+3. Add a **Volume**, mount it at `/data`.
+4. Under the service's **Variables**, add:
+   - `ADMIN_PASSWORD` — your chosen password
+   - `SESSION_SECRET` — a random string (generate with the command above)
+   - `DATA_DIR` = `/data`
+5. Railway auto-detects Next.js, runs `npm install && npm run build`, then `npm run start`, and gives you a public `https://*.up.railway.app` URL.
+
+### Render
+
+1. At [render.com](https://render.com), **New → Web Service**, connect this repo/branch.
+2. Build command: `npm install && npm run build`. Start command: `npm run start`.
+3. Add a **Disk**, mount path `/data`.
+4. Under **Environment**, add `ADMIN_PASSWORD`, `SESSION_SECRET`, and `DATA_DIR=/data`.
+5. Render gives you a public `https://*.onrender.com` URL. Note: free-tier services sleep after inactivity and take ~30s to wake on the next request.
+
+### Backups
+
+Whichever host you use, the entire database is the one file at `$DATA_DIR/app.db`. Back it up regularly — most hosts let you shell in or download from the volume.
+
+### Roadmap: offline use
+
+The app currently requires an internet connection (any type — WiFi or cellular both work fine). True offline support — logging a service call with no signal and syncing once reconnected — is a larger feature (an installable PWA with local storage and background sync) that isn't built yet.
