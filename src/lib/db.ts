@@ -19,6 +19,12 @@ function createConnection() {
   const db = new Database(dbPath);
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
+  // Next.js's build step imports every route module (even dynamic ones) to
+  // determine how to render it, which transitively loads this file across
+  // many parallel worker processes. Without this, concurrent connections
+  // opening/migrating the same file at once fail immediately with
+  // SQLITE_BUSY instead of waiting their turn.
+  db.pragma("busy_timeout = 10000");
   return db;
 }
 

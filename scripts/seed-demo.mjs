@@ -18,6 +18,7 @@ fs.mkdirSync(dataDir, { recursive: true });
 
 const db = new Database(path.join(dataDir, "app.db"));
 db.pragma("foreign_keys = ON");
+db.pragma("busy_timeout = 10000");
 db.exec(fs.readFileSync(path.join(process.cwd(), "src", "lib", "schema.sql"), "utf-8"));
 
 const locationCount = db.prepare("SELECT COUNT(*) as c FROM locations").get().c;
