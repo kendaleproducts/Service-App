@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getDashboardStats } from "@/lib/data";
 import Badge from "@/components/Badge";
+import LoadDemoDataButton from "./LoadDemoDataButton";
 
 export const dynamic = "force-dynamic";
 
@@ -37,11 +38,14 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-charcoal">Dashboard</h1>
-        <p className="text-sm text-stone-500 mt-1">
-          Mary Brown&apos;s service operations, managed from Fort Erie, ON.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-charcoal">Dashboard</h1>
+          <p className="text-sm text-stone-500 mt-1">
+            Mary Brown&apos;s service operations, managed from Fort Erie, ON.
+          </p>
+        </div>
+        <LoadDemoDataButton />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
