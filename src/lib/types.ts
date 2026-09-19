@@ -36,6 +36,8 @@ export interface Location {
   postal_code: string | null;
   phone: string | null;
   contact_name: string | null;
+  latitude: number | null;
+  longitude: number | null;
   notes: string | null;
   created_at: string;
   updated_at: string;

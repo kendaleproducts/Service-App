@@ -11,6 +11,7 @@
     "seed:fryers": "node scripts/seed-fryer-demo.mjs"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.8",
     "better-sqlite3": "^13.0.3",
     "next": "16.3.5",
     "react": "19.2.8",

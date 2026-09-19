@@ -56,6 +56,30 @@ export function listLocations(filters: {
     .all(params) as Location[];
 }
 
+export function listLocationsMissingCoordinates(): Location[] {
+  return db
+    .prepare(
+      "SELECT * FROM locations WHERE latitude IS NULL AND address IS NOT NULL AND address != '' ORDER BY store_number"
+    )
+    .all() as Location[];
+}
+
+export function listGeocodedLocations(): Location[] {
+  return db
+    .prepare(
+      "SELECT * FROM locations WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND status = 'Open' ORDER BY store_number"
+    )
+    .all() as Location[];
+}
+
+export function listGeocodedServiceCompanies(): ServiceCompany[] {
+  return db
+    .prepare(
+      "SELECT * FROM service_companies WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY name"
+    )
+    .all() as ServiceCompany[];
+}
+
 export function getLocation(id: number): Location | undefined {
   return db.prepare("SELECT * FROM locations WHERE id = ?").get(id) as
     | Location
@@ -118,6 +142,8 @@ export function updateLocation(
     postal_code: string | null;
     phone: string | null;
     contact_name: string | null;
+    latitude: number | null;
+    longitude: number | null;
     notes: string | null;
   }>
 ): void {

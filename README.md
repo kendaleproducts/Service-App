@@ -41,8 +41,10 @@ Both are safe to re-run — each only inserts if its data doesn't already exist.
 | `ADMIN_PASSWORD` | The single shared password staff use to sign in |
 | `SESSION_SECRET` | Random string used to sign session cookies. Generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | `DATA_DIR` | Optional. Where the SQLite file is stored. Defaults to `./data`. Set this to point at a mounted persistent volume when deploying (see below). |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Optional. Enables the map on the Locations page. See "Map setup" below. |
+| `GOOGLE_MAPS_API_KEY` | Optional. Used server-side to geocode location addresses into map coordinates. See "Map setup" below. |
 
-`ADMIN_PASSWORD` and `SESSION_SECRET` are required — the app will throw on first use if either is missing.
+`ADMIN_PASSWORD` and `SESSION_SECRET` are required — the app will throw on first use if either is missing. The two map keys are optional — without them, the Locations page just shows a small "map unavailable" notice instead of a map.
 
 ## Data model
 
@@ -63,6 +65,22 @@ Go to **Locations → Import from Excel** and upload the head office spreadsheet
 - Common status typos (e.g. "Archvied") are normalized automatically.
 
 Re-running the import with an updated spreadsheet is safe — it's an upsert, not a wipe-and-reload.
+
+## Map setup (optional)
+
+The Locations page can show an embedded Google Map with two toggleable layers — Stores (Mary Brown's locations) and Vendors (contracted service companies). Vendor pins come free once you import a service companies spreadsheet that includes coordinates (see below); store pins need a one-time geocoding pass since the head office spreadsheet only has addresses, not coordinates.
+
+This needs **two separate API keys** from the same Google Cloud project — they have different security models, so don't reuse one for both:
+
+1. At [console.cloud.google.com](https://console.cloud.google.com), create a project (or use an existing one) and enable billing. Google gives $200/month in free credit, which comfortably covers this app's usage — you're unlikely to see a bill.
+2. Enable two APIs under **APIs & Services → Library**: **Maps JavaScript API** and **Geocoding API**.
+3. Under **APIs & Services → Credentials**, create two API keys:
+   - **Client key** (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`) — restrict it to the **Maps JavaScript API**, and under "Application restrictions" set **HTTP referrers** to your domain(s), e.g. `https://*.up.railway.app/*` and `http://localhost:3000/*`. This key is visible in the page source (that's normal for Maps JavaScript API) — the referrer restriction is what keeps it from being usable elsewhere.
+   - **Server key** (`GOOGLE_MAPS_API_KEY`) — restrict it to the **Geocoding API**. Since this is called from your server (no browser referrer), either leave it unrestricted or restrict by your host's IP address if it's static. Keep this one out of any client-facing code.
+4. Add both keys to your environment (`.env.local` locally, or your host's environment variables — e.g. Railway's Variables tab), then redeploy/restart.
+5. Once real locations are imported, go to **Locations** and click **"Geocode N Location(s) for Map"** — a one-time pass that looks up coordinates for every location missing them and stores them. Safe to re-run; it only processes locations still missing coordinates.
+
+Vendor coordinates come from the Service Companies importer automatically if your spreadsheet has a `Location` column formatted as `"lat, long"` (see the Service Companies import help text) — no separate geocoding step needed. If a vendor spreadsheet only has addresses instead, those companies just won't appear on the map layer until coordinates are added directly (there's no geocode-on-demand button for vendors yet, only for locations).
 
 ## Deployment
 

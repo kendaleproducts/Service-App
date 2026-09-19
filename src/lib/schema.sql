@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS locations (
   postal_code TEXT,
   phone TEXT,
   contact_name TEXT,
+  latitude REAL,
+  longitude REAL,
   notes TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),

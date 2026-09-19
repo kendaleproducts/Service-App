@@ -46,3 +46,5 @@ addColumnIfMissing("service_companies", "postal_code", "TEXT");
 addColumnIfMissing("service_companies", "country", "TEXT");
 addColumnIfMissing("service_companies", "latitude", "REAL");
 addColumnIfMissing("service_companies", "longitude", "REAL");
+addColumnIfMissing("locations", "latitude", "REAL");
+addColumnIfMissing("locations", "longitude", "REAL");

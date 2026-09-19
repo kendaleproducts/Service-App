@@ -1,6 +1,14 @@
 import Link from "next/link";
-import { listLocations, listProvinces } from "@/lib/data";
+import {
+  listLocations,
+  listLocationsMissingCoordinates,
+  listGeocodedLocations,
+  listGeocodedServiceCompanies,
+  listProvinces,
+} from "@/lib/data";
 import Badge from "@/components/Badge";
+import LocationsMap from "@/components/LocationsMap";
+import GeocodeButton from "./GeocodeButton";
 import { LOCATION_STATUSES } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +25,9 @@ export default async function LocationsPage({
     province: params.province,
   });
   const provinces = listProvinces();
+  const missingCoordinates = listLocationsMissingCoordinates();
+  const mapLocations = listGeocodedLocations();
+  const mapVendors = listGeocodedServiceCompanies();
 
   return (
     <div className="space-y-6">
@@ -40,6 +51,29 @@ export default async function LocationsPage({
           </Link>
         </div>
       </div>
+
+      <GeocodeButton missingCount={missingCoordinates.length} />
+
+      <LocationsMap
+        locations={mapLocations.map((l) => ({
+          id: l.id,
+          store_number: l.store_number,
+          name: l.name,
+          city: l.city,
+          province: l.province,
+          latitude: l.latitude as number,
+          longitude: l.longitude as number,
+        }))}
+        vendors={mapVendors.map((v) => ({
+          id: v.id,
+          name: v.name,
+          city: v.city,
+          province: v.province,
+          phone: v.phone,
+          latitude: v.latitude as number,
+          longitude: v.longitude as number,
+        }))}
+      />
 
       <form className="flex flex-wrap gap-3 bg-white border border-stone-200 rounded-lg p-4">
         <input
