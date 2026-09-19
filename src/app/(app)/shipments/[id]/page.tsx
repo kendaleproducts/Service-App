@@ -21,7 +21,7 @@ export default async function ShipmentDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link href="/shipments" className="text-sm text-stone-500 hover:text-hotsauce">
             ← Back to shipments
@@ -39,28 +39,30 @@ export default async function ShipmentDetailPage({
           <div className="px-4 py-3 border-b border-stone-200">
             <h2 className="font-medium text-charcoal">Parts in this Shipment</h2>
           </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-stone-500 border-b border-stone-100">
-                <th className="px-4 py-2 font-medium">Part #</th>
-                <th className="px-4 py-2 font-medium">Description</th>
-                <th className="px-4 py-2 font-medium">Qty</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id} className="border-b border-stone-50 last:border-0">
-                  <td className="px-4 py-2">
-                    <Link href={`/parts/${item.part_id}`} className="text-charcoal hover:underline">
-                      {item.part_number}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2 text-stone-600">{item.description}</td>
-                  <td className="px-4 py-2 text-stone-600">{item.quantity}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-stone-500 border-b border-stone-100">
+                  <th className="px-4 py-2 font-medium">Part #</th>
+                  <th className="px-4 py-2 font-medium">Description</th>
+                  <th className="px-4 py-2 font-medium">Qty</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.id} className="border-b border-stone-50 last:border-0">
+                    <td className="px-4 py-2">
+                      <Link href={`/parts/${item.part_id}`} className="text-charcoal hover:underline">
+                        {item.part_number}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2 text-stone-600">{item.description}</td>
+                    <td className="px-4 py-2 text-stone-600">{item.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {shipment.notes && (
             <div className="px-4 py-3 border-t border-stone-100 text-sm text-stone-600">
               {shipment.notes}

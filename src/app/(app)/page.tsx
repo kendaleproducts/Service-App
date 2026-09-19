@@ -80,43 +80,45 @@ export default async function DashboardPage() {
         {stats.recentRequests.length === 0 ? (
           <p className="px-4 py-6 text-sm text-stone-500">No service requests yet.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-stone-500 border-b border-stone-100">
-                <th className="px-4 py-2 font-medium">Location</th>
-                <th className="px-4 py-2 font-medium">Issue</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2 font-medium">Priority</th>
-                <th className="px-4 py-2 font-medium">Company</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats.recentRequests.map((r) => (
-                <tr
-                  key={r.id}
-                  className="border-b border-stone-50 last:border-0 hover:bg-stone-50"
-                >
-                  <td className="px-4 py-2">
-                    <Link href={`/service-requests/${r.id}`} className="text-charcoal hover:underline">
-                      #{r.store_number} {r.location_name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2 text-stone-600 max-w-xs truncate">
-                    {r.issue_description}
-                  </td>
-                  <td className="px-4 py-2">
-                    <Badge label={r.status} />
-                  </td>
-                  <td className="px-4 py-2">
-                    <Badge label={r.priority} />
-                  </td>
-                  <td className="px-4 py-2 text-stone-600">
-                    {r.service_company_name ?? "—"}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-stone-500 border-b border-stone-100">
+                  <th className="px-4 py-2 font-medium">Location</th>
+                  <th className="px-4 py-2 font-medium">Issue</th>
+                  <th className="px-4 py-2 font-medium">Status</th>
+                  <th className="px-4 py-2 font-medium">Priority</th>
+                  <th className="px-4 py-2 font-medium">Company</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {stats.recentRequests.map((r) => (
+                  <tr
+                    key={r.id}
+                    className="border-b border-stone-50 last:border-0 hover:bg-stone-50"
+                  >
+                    <td className="px-4 py-2">
+                      <Link href={`/service-requests/${r.id}`} className="text-charcoal hover:underline">
+                        #{r.store_number} {r.location_name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2 text-stone-600 max-w-xs truncate">
+                      {r.issue_description}
+                    </td>
+                    <td className="px-4 py-2">
+                      <Badge label={r.status} />
+                    </td>
+                    <td className="px-4 py-2">
+                      <Badge label={r.priority} />
+                    </td>
+                    <td className="px-4 py-2 text-stone-600">
+                      {r.service_company_name ?? "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
