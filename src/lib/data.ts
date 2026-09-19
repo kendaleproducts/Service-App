@@ -216,6 +216,33 @@ export function updateServiceCompany(
   ).run({ ...input, id });
 }
 
+export function upsertServiceCompanyByName(input: {
+  name: string;
+  contact_name: string | null;
+  phone: string | null;
+  email: string | null;
+  coverage_area: string | null;
+  notes: string | null;
+}): "inserted" | "updated" {
+  const existing = db
+    .prepare("SELECT id FROM service_companies WHERE lower(name) = lower(?)")
+    .get(input.name) as { id: number } | undefined;
+
+  if (existing) {
+    db.prepare(
+      `UPDATE service_companies SET contact_name=@contact_name, phone=@phone, email=@email,
+        coverage_area=@coverage_area, notes=@notes, updated_at=datetime('now')
+       WHERE id=@id`
+    ).run({ ...input, id: existing.id });
+    return "updated";
+  }
+  db.prepare(
+    `INSERT INTO service_companies (name, contact_name, phone, email, coverage_area, notes)
+     VALUES (@name, @contact_name, @phone, @email, @coverage_area, @notes)`
+  ).run(input);
+  return "inserted";
+}
+
 // ---------- Parts ----------
 
 export function listParts(q?: string): Part[] {

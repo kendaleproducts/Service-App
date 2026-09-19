@@ -13,12 +13,20 @@ export default async function ServiceCompaniesPage() {
           <h1 className="text-2xl font-semibold text-charcoal">Service Companies</h1>
           <p className="text-sm text-stone-500 mt-1">{companies.length} contracted vendor(s)</p>
         </div>
-        <Link
-          href="/service-companies/new"
-          className="rounded-md bg-hotsauce px-3 py-2 text-sm font-medium text-white hover:bg-hickory"
-        >
-          Add Company
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/service-companies/import"
+            className="rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+          >
+            Import from Excel
+          </Link>
+          <Link
+            href="/service-companies/new"
+            className="rounded-md bg-hotsauce px-3 py-2 text-sm font-medium text-white hover:bg-hickory"
+          >
+            Add Company
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white border border-stone-200 rounded-lg overflow-x-auto">

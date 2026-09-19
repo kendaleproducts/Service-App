@@ -134,10 +134,16 @@ function ensureFryerParts(): Record<string, number> {
 }
 
 function ensureFryerServiceCompany(): number {
-  const existing = db
+  const kendale = db
     .prepare("SELECT id FROM service_companies WHERE name LIKE '%Kendale%'")
     .get() as { id: number } | undefined;
-  if (existing) return existing.id;
+  if (kendale) return kendale.id;
+
+  // Prefer a real imported company over fabricating one, if any exist.
+  const anyReal = db
+    .prepare("SELECT id FROM service_companies ORDER BY id LIMIT 1")
+    .get() as { id: number } | undefined;
+  if (anyReal) return anyReal.id;
 
   const info = db
     .prepare(
