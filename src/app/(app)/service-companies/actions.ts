@@ -11,6 +11,10 @@ function fields(formData: FormData) {
     phone: String(formData.get("phone") ?? "") || null,
     email: String(formData.get("email") ?? "") || null,
     coverage_area: String(formData.get("coverage_area") ?? "") || null,
+    address: String(formData.get("address") ?? "") || null,
+    city: String(formData.get("city") ?? "") || null,
+    province: String(formData.get("province") ?? "") || null,
+    postal_code: String(formData.get("postal_code") ?? "") || null,
     notes: String(formData.get("notes") ?? "") || null,
   };
 }

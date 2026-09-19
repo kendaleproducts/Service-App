@@ -48,6 +48,13 @@ export interface ServiceCompany {
   phone: string | null;
   email: string | null;
   coverage_area: string | null;
+  address: string | null;
+  city: string | null;
+  province: string | null;
+  postal_code: string | null;
+  country: string | null;
+  latitude: number | null;
+  longitude: number | null;
   notes: string | null;
   created_at: string;
   updated_at: string;

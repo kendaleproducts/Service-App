@@ -179,18 +179,33 @@ export function createServiceCompany(input: {
   phone?: string | null;
   email?: string | null;
   coverage_area?: string | null;
+  address?: string | null;
+  city?: string | null;
+  province?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   notes?: string | null;
 }): number {
   const info = db
     .prepare(
-      `INSERT INTO service_companies (name, contact_name, phone, email, coverage_area, notes)
-       VALUES (@name, @contact_name, @phone, @email, @coverage_area, @notes)`
+      `INSERT INTO service_companies
+        (name, contact_name, phone, email, coverage_area, address, city, province, postal_code, country, latitude, longitude, notes)
+       VALUES (@name, @contact_name, @phone, @email, @coverage_area, @address, @city, @province, @postal_code, @country, @latitude, @longitude, @notes)`
     )
     .run({
       contact_name: null,
       phone: null,
       email: null,
       coverage_area: null,
+      address: null,
+      city: null,
+      province: null,
+      postal_code: null,
+      country: null,
+      latitude: null,
+      longitude: null,
       notes: null,
       ...input,
     });
@@ -205,6 +220,13 @@ export function updateServiceCompany(
     phone: string | null;
     email: string | null;
     coverage_area: string | null;
+    address: string | null;
+    city: string | null;
+    province: string | null;
+    postal_code: string | null;
+    country: string | null;
+    latitude: number | null;
+    longitude: number | null;
     notes: string | null;
   }>
 ): void {
@@ -216,29 +238,49 @@ export function updateServiceCompany(
   ).run({ ...input, id });
 }
 
-export function upsertServiceCompanyByName(input: {
+export function upsertServiceCompanyByNameAndPostalCode(input: {
   name: string;
   contact_name: string | null;
   phone: string | null;
   email: string | null;
   coverage_area: string | null;
+  address: string | null;
+  city: string | null;
+  province: string | null;
+  postal_code: string | null;
+  country: string | null;
+  latitude: number | null;
+  longitude: number | null;
   notes: string | null;
 }): "inserted" | "updated" {
-  const existing = db
-    .prepare("SELECT id FROM service_companies WHERE lower(name) = lower(?)")
-    .get(input.name) as { id: number } | undefined;
+  // Matched by name + postal code (or + city if no postal code) rather than
+  // name alone, since the same company can have multiple regional branches.
+  const existing = input.postal_code
+    ? (db
+        .prepare(
+          "SELECT id FROM service_companies WHERE lower(name) = lower(?) AND lower(postal_code) = lower(?)"
+        )
+        .get(input.name, input.postal_code) as { id: number } | undefined)
+    : (db
+        .prepare(
+          "SELECT id FROM service_companies WHERE lower(name) = lower(?) AND lower(coalesce(city, '')) = lower(?)"
+        )
+        .get(input.name, input.city ?? "") as { id: number } | undefined);
 
   if (existing) {
     db.prepare(
       `UPDATE service_companies SET contact_name=@contact_name, phone=@phone, email=@email,
-        coverage_area=@coverage_area, notes=@notes, updated_at=datetime('now')
+        coverage_area=@coverage_area, address=@address, city=@city, province=@province,
+        postal_code=@postal_code, country=@country, latitude=@latitude, longitude=@longitude,
+        notes=@notes, updated_at=datetime('now')
        WHERE id=@id`
     ).run({ ...input, id: existing.id });
     return "updated";
   }
   db.prepare(
-    `INSERT INTO service_companies (name, contact_name, phone, email, coverage_area, notes)
-     VALUES (@name, @contact_name, @phone, @email, @coverage_area, @notes)`
+    `INSERT INTO service_companies
+      (name, contact_name, phone, email, coverage_area, address, city, province, postal_code, country, latitude, longitude, notes)
+     VALUES (@name, @contact_name, @phone, @email, @coverage_area, @address, @city, @province, @postal_code, @country, @latitude, @longitude, @notes)`
   ).run(input);
   return "inserted";
 }

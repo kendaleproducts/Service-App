@@ -7,7 +7,7 @@ export default function ImportForm() {
   return (
     <SpreadsheetImportForm
       action={runServiceCompanyImport}
-      helpText="Expected columns (names are flexible): Company Name, Contact Name, Phone, Email, Coverage Area, Notes. Existing companies are matched and updated by name; new names are added."
+      helpText='Accepts either format: Name, Location ("lat, long"), Street, City, State/Region, Country, Postal Code — or Company Name, Contact Name, Phone, Email, Coverage Area, Notes. Column names are matched flexibly. Matched and updated by name + postal code, so the same company can have multiple regional branches.'
     />
   );
 }

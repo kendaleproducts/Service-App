@@ -58,6 +58,38 @@ export default function CompanyForm({
           />
         </div>
         <div className="col-span-2">
+          <label className="block text-xs font-medium text-stone-500 mb-1">Address</label>
+          <input
+            name="address"
+            defaultValue={company?.address ?? ""}
+            className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-stone-500 mb-1">City</label>
+          <input
+            name="city"
+            defaultValue={company?.city ?? ""}
+            className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-stone-500 mb-1">Province</label>
+          <input
+            name="province"
+            defaultValue={company?.province ?? ""}
+            className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-stone-500 mb-1">Postal Code</label>
+          <input
+            name="postal_code"
+            defaultValue={company?.postal_code ?? ""}
+            className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div className="col-span-2">
           <label className="block text-xs font-medium text-stone-500 mb-1">Notes</label>
           <textarea
             name="notes"

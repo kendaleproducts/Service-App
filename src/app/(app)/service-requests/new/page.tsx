@@ -88,7 +88,7 @@ export default async function NewServiceRequestPage({
               <option value="">Unassigned</option>
               {companies.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name}
+                  {c.name}{c.city ? ` (${c.city}${c.province ? ", " + c.province : ""})` : ""}
                 </option>
               ))}
             </select>

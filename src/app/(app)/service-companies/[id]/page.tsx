@@ -26,6 +26,13 @@ export default async function ServiceCompanyDetailPage({
           ← Back to service companies
         </Link>
         <h1 className="text-2xl font-semibold text-charcoal mt-1">{company.name}</h1>
+        {(company.city || company.province) && (
+          <p className="text-sm text-stone-500">
+            {company.city}
+            {company.city && company.province ? ", " : ""}
+            {company.province}
+          </p>
+        )}
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">

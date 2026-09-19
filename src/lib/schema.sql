@@ -32,6 +32,13 @@ CREATE TABLE IF NOT EXISTS service_companies (
   phone TEXT,
   email TEXT,
   coverage_area TEXT,
+  address TEXT,
+  city TEXT,
+  province TEXT,
+  postal_code TEXT,
+  country TEXT,
+  latitude REAL,
+  longitude REAL,
   notes TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))

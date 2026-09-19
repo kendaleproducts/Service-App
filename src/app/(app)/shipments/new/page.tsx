@@ -66,7 +66,7 @@ export default async function NewShipmentPage({
               <option value="">— None —</option>
               {companies.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name}
+                  {c.name}{c.city ? ` (${c.city}${c.province ? ", " + c.province : ""})` : ""}
                 </option>
               ))}
             </select>

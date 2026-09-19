@@ -29,3 +29,20 @@ if (process.env.NODE_ENV !== "production") {
 
 const schemaPath = path.join(process.cwd(), "src", "lib", "schema.sql");
 db.exec(fs.readFileSync(schemaPath, "utf-8"));
+
+// Lightweight migrations for columns added after a database already exists
+// (CREATE TABLE IF NOT EXISTS above only helps brand-new databases).
+function addColumnIfMissing(table: string, column: string, definition: string) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!columns.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
+addColumnIfMissing("service_companies", "address", "TEXT");
+addColumnIfMissing("service_companies", "city", "TEXT");
+addColumnIfMissing("service_companies", "province", "TEXT");
+addColumnIfMissing("service_companies", "postal_code", "TEXT");
+addColumnIfMissing("service_companies", "country", "TEXT");
+addColumnIfMissing("service_companies", "latitude", "REAL");
+addColumnIfMissing("service_companies", "longitude", "REAL");
