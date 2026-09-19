@@ -18,7 +18,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2 font-heading font-medium text-white">
-              <FlameMark className="h-6 w-6 shrink-0" />
+              <FlameMark className="h-7 w-auto shrink-0" />
               <span>
                 Service Tracker
                 <span className="block text-[10px] font-sans font-normal tracking-wide text-white/50 -mt-0.5">
