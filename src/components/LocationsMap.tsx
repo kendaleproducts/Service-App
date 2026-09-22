@@ -153,12 +153,9 @@ function LoadedMap({
               key={`loc-${loc.id}`}
               position={{ lat: loc.latitude, lng: loc.longitude }}
               icon={{
-                path: 0, // google.maps.SymbolPath.CIRCLE
-                fillColor: "#D5522F",
-                fillOpacity: 1,
-                strokeColor: "#ffffff",
-                strokeWeight: 1,
-                scale: 6,
+                url: "/brand/mary-browns-mark.png",
+                scaledSize: new google.maps.Size(32, 32),
+                anchor: new google.maps.Point(16, 16),
               }}
               onClick={() => setSelected({ type: "location", data: loc })}
             />
