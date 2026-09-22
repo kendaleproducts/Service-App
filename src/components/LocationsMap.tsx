@@ -102,7 +102,7 @@ function LoadedMap({
             checked={showVendors}
             onChange={(e) => setShowVendors(e.target.checked)}
           />
-          Vendors ({vendors.length})
+          Service Companies ({vendors.length})
         </label>
       </div>
       <GoogleMap
@@ -190,7 +190,7 @@ function LoadedMap({
                 href={`/service-companies/${selected.data.id}`}
                 className="text-hotsauce hover:underline mt-2 inline-block"
               >
-                View vendor
+                View service company
               </a>
             </div>
           </InfoWindowF>
