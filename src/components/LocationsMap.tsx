@@ -190,7 +190,7 @@ function LoadedMap({
                 href={`/service-companies/${selected.data.id}`}
                 className="text-hotsauce hover:underline mt-2 inline-block"
               >
-                View service company
+                Service Companies
               </a>
             </div>
           </InfoWindowF>
