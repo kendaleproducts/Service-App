@@ -67,7 +67,7 @@ export function listLocationsMissingCoordinates(): Location[] {
 export function listGeocodedLocations(): Location[] {
   return db
     .prepare(
-      "SELECT * FROM locations WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND status = 'Open' ORDER BY store_number"
+      "SELECT * FROM locations WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY store_number"
     )
     .all() as Location[];
 }

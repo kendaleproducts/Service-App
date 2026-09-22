@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { GoogleMap, MarkerF, InfoWindowF, useJsApiLoader } from "@react-google-maps/api";
+import { LOCATION_STATUSES } from "@/lib/types";
 
 export interface MapLocation {
   id: number;
@@ -9,6 +10,7 @@ export interface MapLocation {
   name: string;
   city: string | null;
   province: string | null;
+  status: string;
   latitude: number;
   longitude: number;
 }
@@ -30,6 +32,10 @@ type Selection =
 const CANADA_CENTER = { lat: 56.1304, lng: -106.3468 };
 const MAP_CONTAINER_STYLE = { width: "100%", height: "420px" };
 const MAP_OPTIONS = { streetViewControl: false, mapTypeControl: false, fullscreenControl: false };
+
+// Material Icons "build" (wrench) glyph, 24x24 viewBox.
+const WRENCH_PATH =
+  "M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z";
 
 export default function LocationsMap(props: { locations: MapLocation[]; vendors: MapVendor[] }) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -61,12 +67,30 @@ function LoadedMap({
 
   const [showStores, setShowStores] = useState(true);
   const [showVendors, setShowVendors] = useState(vendors.length > 0 && locations.length === 0);
+  const [statusFilter, setStatusFilter] = useState<Set<string>>(new Set(LOCATION_STATUSES));
   const [selected, setSelected] = useState<Selection | null>(null);
 
+  const filteredLocations = useMemo(
+    () => locations.filter((loc) => statusFilter.has(loc.status)),
+    [locations, statusFilter]
+  );
+
   const center = useMemo(() => {
-    const first = locations[0] ?? vendors[0];
+    const first = filteredLocations[0] ?? vendors[0];
     return first ? { lat: first.latitude, lng: first.longitude } : CANADA_CENTER;
-  }, [locations, vendors]);
+  }, [filteredLocations, vendors]);
+
+  function toggleStatus(status: string) {
+    setStatusFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(status)) {
+        next.delete(status);
+      } else {
+        next.add(status);
+      }
+      return next;
+    });
+  }
 
   if (loadError) {
     return (
@@ -94,7 +118,7 @@ function LoadedMap({
             checked={showStores}
             onChange={(e) => setShowStores(e.target.checked)}
           />
-          Stores ({locations.length})
+          Stores ({filteredLocations.length})
         </label>
         <label className="flex items-center gap-2 text-stone-700">
           <input
@@ -104,15 +128,27 @@ function LoadedMap({
           />
           Service Companies ({vendors.length})
         </label>
+        <span className="h-4 w-px bg-stone-200" />
+        <span className="text-stone-500">Store status:</span>
+        {LOCATION_STATUSES.map((status) => (
+          <label key={status} className="flex items-center gap-1.5 text-stone-700">
+            <input
+              type="checkbox"
+              checked={statusFilter.has(status)}
+              onChange={() => toggleStatus(status)}
+            />
+            {status}
+          </label>
+        ))}
       </div>
       <GoogleMap
         mapContainerStyle={MAP_CONTAINER_STYLE}
         center={center}
-        zoom={locations.length + vendors.length > 0 ? 4 : 3}
+        zoom={filteredLocations.length + vendors.length > 0 ? 4 : 3}
         options={MAP_OPTIONS}
       >
         {showStores &&
-          locations.map((loc) => (
+          filteredLocations.map((loc) => (
             <MarkerF
               key={`loc-${loc.id}`}
               position={{ lat: loc.latitude, lng: loc.longitude }}
@@ -133,12 +169,13 @@ function LoadedMap({
               key={`vendor-${v.id}`}
               position={{ lat: v.latitude, lng: v.longitude }}
               icon={{
-                path: 0, // google.maps.SymbolPath.CIRCLE
+                path: WRENCH_PATH,
                 fillColor: "#1D1B1B",
                 fillOpacity: 1,
                 strokeColor: "#ffffff",
                 strokeWeight: 1,
-                scale: 6,
+                scale: 1.1,
+                anchor: new google.maps.Point(12, 12),
               }}
               onClick={() => setSelected({ type: "vendor", data: v })}
             />

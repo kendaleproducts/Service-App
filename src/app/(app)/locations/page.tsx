@@ -61,6 +61,7 @@ export default async function LocationsPage({
           name: l.name,
           city: l.city,
           province: l.province,
+          status: l.status,
           latitude: l.latitude as number,
           longitude: l.longitude as number,
         }))}
