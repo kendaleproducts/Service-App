@@ -12,9 +12,11 @@ export interface ImportResult {
 export default function SpreadsheetImportForm({
   action,
   helpText,
+  replaceOption,
 }: {
   action: (prevState: ImportResult | null, formData: FormData) => Promise<ImportResult>;
   helpText: string;
+  replaceOption?: { label: string; warning: string };
 }) {
   const [result, formAction, isPending] = useActionState(action, null);
 
@@ -34,6 +36,15 @@ export default function SpreadsheetImportForm({
           />
           <p className="text-xs text-stone-500 mt-2">{helpText}</p>
         </div>
+        {replaceOption && (
+          <div className="rounded-md border border-hickory/30 bg-hickory/5 p-3">
+            <label className="flex items-start gap-2 text-sm text-charcoal">
+              <input type="checkbox" name="replace" className="mt-0.5" />
+              <span className="font-medium">{replaceOption.label}</span>
+            </label>
+            <p className="text-xs text-hickory mt-1 ml-6">{replaceOption.warning}</p>
+          </div>
+        )}
         <button
           type="submit"
           disabled={isPending}

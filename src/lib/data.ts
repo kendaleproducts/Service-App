@@ -223,6 +223,18 @@ export function getServiceCompany(id: number): ServiceCompany | undefined {
     | undefined;
 }
 
+export const deleteAllServiceCompanies = db.transaction(() => {
+  // Unassign rather than delete so existing service request / shipment
+  // history isn't lost when the vendor list is replaced wholesale.
+  db.prepare(
+    "UPDATE service_requests SET service_company_id = NULL WHERE service_company_id IS NOT NULL"
+  ).run();
+  db.prepare(
+    "UPDATE part_shipments SET service_company_id = NULL WHERE service_company_id IS NOT NULL"
+  ).run();
+  db.prepare("DELETE FROM service_companies").run();
+});
+
 export function createServiceCompany(input: {
   name: string;
   contact_name?: string | null;

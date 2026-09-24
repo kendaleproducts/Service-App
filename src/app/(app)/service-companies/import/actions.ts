@@ -21,9 +21,10 @@ export async function runServiceCompanyImport(
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
+  const mode = formData.get("replace") === "on" ? "replace" : "merge";
 
   try {
-    const result = importServiceCompaniesFromWorkbook(buffer);
+    const result = importServiceCompaniesFromWorkbook(buffer, mode);
     revalidatePath("/service-companies");
     return result;
   } catch (err) {

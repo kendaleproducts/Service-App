@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { upsertServiceCompanyByNameAndPostalCode } from "./data";
+import { deleteAllServiceCompanies, upsertServiceCompanyByNameAndPostalCode } from "./data";
 
 const PROVINCE_MAP: Record<string, string> = {
   bc: "BC",
@@ -69,7 +69,10 @@ export interface ImportResult {
   errors: string[];
 }
 
-export function importServiceCompaniesFromWorkbook(buffer: Buffer): ImportResult {
+export function importServiceCompaniesFromWorkbook(
+  buffer: Buffer,
+  mode: "merge" | "replace" = "merge"
+): ImportResult {
   const workbook = XLSX.read(buffer, { type: "buffer" });
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
@@ -78,6 +81,16 @@ export function importServiceCompaniesFromWorkbook(buffer: Buffer): ImportResult
   });
 
   const result: ImportResult = { inserted: 0, updated: 0, skipped: 0, errors: [] };
+
+  if (mode === "replace") {
+    if (rows.length === 0) {
+      result.errors.push(
+        "Replace mode refused: the file has no rows. Nothing was deleted."
+      );
+      return result;
+    }
+    deleteAllServiceCompanies();
+  }
 
   rows.forEach((row, index) => {
     const nameKey = findKey(row, [
