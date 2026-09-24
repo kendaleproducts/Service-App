@@ -386,6 +386,7 @@ export function adjustPartQuantity(id: number, delta: number): void {
 // ---------- Service requests ----------
 
 export function listServiceRequests(filters: {
+  q?: string;
   status?: string;
   priority?: string;
   locationId?: number;
@@ -393,6 +394,10 @@ export function listServiceRequests(filters: {
 }): ServiceRequestWithJoins[] {
   const clauses: string[] = [];
   const params: Record<string, string | number> = {};
+  if (filters.q) {
+    clauses.push("(l.name LIKE @q OR l.store_number LIKE @q OR l.city LIKE @q)");
+    params.q = `%${filters.q}%`;
+  }
   if (filters.status) {
     clauses.push("sr.status = @status");
     params.status = filters.status;
