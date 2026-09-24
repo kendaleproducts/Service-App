@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getLocation, listServiceRequests } from "@/lib/data";
+import { getLocation, listNearestServiceCompanies, listServiceRequests } from "@/lib/data";
 import { LOCATION_STATUSES } from "@/lib/types";
 import Badge from "@/components/Badge";
 import { updateLocationAction } from "../actions";
@@ -17,6 +17,7 @@ export default async function LocationDetailPage({
   if (!location) notFound();
 
   const requests = listServiceRequests({ locationId: location.id });
+  const nearestCompanies = listNearestServiceCompanies(location.id, 3);
   const updateWithId = updateLocationAction.bind(null, location.id);
 
   return (
@@ -140,36 +141,77 @@ export default async function LocationDetailPage({
           </button>
         </form>
 
-        <div className="bg-white border border-stone-200 rounded-lg">
-          <div className="px-4 py-3 border-b border-stone-200">
-            <h2 className="font-medium text-charcoal">Service History</h2>
+        <div className="space-y-6">
+          <div className="bg-white border border-stone-200 rounded-lg">
+            <div className="px-4 py-3 border-b border-stone-200">
+              <h2 className="font-medium text-charcoal">Service History</h2>
+            </div>
+            {requests.length === 0 ? (
+              <p className="px-4 py-6 text-sm text-stone-500">No service requests for this location yet.</p>
+            ) : (
+              <ul className="divide-y divide-stone-100">
+                {requests.map((r) => (
+                  <li key={r.id} className="px-4 py-3">
+                    <Link
+                      href={`/service-requests/${r.id}`}
+                      className="text-sm font-medium text-charcoal hover:underline"
+                    >
+                      {r.issue_description}
+                    </Link>
+                    <div className="mt-1 flex items-center gap-2 flex-wrap">
+                      <Badge label={r.status} />
+                      <Badge label={r.priority} />
+                      <span className="text-xs text-stone-500">
+                        {new Date(r.reported_at).toLocaleDateString()}
+                      </span>
+                      {r.service_company_name && (
+                        <span className="text-xs text-stone-500">· {r.service_company_name}</span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          {requests.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-stone-500">No service requests for this location yet.</p>
-          ) : (
-            <ul className="divide-y divide-stone-100">
-              {requests.map((r) => (
-                <li key={r.id} className="px-4 py-3">
-                  <Link
-                    href={`/service-requests/${r.id}`}
-                    className="text-sm font-medium text-charcoal hover:underline"
-                  >
-                    {r.issue_description}
-                  </Link>
-                  <div className="mt-1 flex items-center gap-2 flex-wrap">
-                    <Badge label={r.status} />
-                    <Badge label={r.priority} />
-                    <span className="text-xs text-stone-500">
-                      {new Date(r.reported_at).toLocaleDateString()}
+
+          <div className="bg-white border border-stone-200 rounded-lg">
+            <div className="px-4 py-3 border-b border-stone-200">
+              <h2 className="font-medium text-charcoal">Nearest Service Companies</h2>
+            </div>
+            {location.latitude == null || location.longitude == null ? (
+              <p className="px-4 py-6 text-sm text-stone-500">
+                Geocode this location (from the Locations map) to see nearby service companies.
+              </p>
+            ) : nearestCompanies.length === 0 ? (
+              <p className="px-4 py-6 text-sm text-stone-500">
+                No geocoded service companies to compare against yet.
+              </p>
+            ) : (
+              <ul className="divide-y divide-stone-100">
+                {nearestCompanies.map((c) => (
+                  <li key={c.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                    <div>
+                      <Link
+                        href={`/service-companies/${c.id}`}
+                        className="text-sm font-medium text-charcoal hover:underline"
+                      >
+                        {c.name}
+                      </Link>
+                      <p className="text-xs text-stone-500">
+                        {c.city}
+                        {c.city && c.province ? ", " : ""}
+                        {c.province}
+                        {c.phone ? ` · ${c.phone}` : ""}
+                      </p>
+                    </div>
+                    <span className="text-sm font-medium text-stone-600 whitespace-nowrap">
+                      {c.distanceKm.toFixed(1)} km
                     </span>
-                    {r.service_company_name && (
-                      <span className="text-xs text-stone-500">· {r.service_company_name}</span>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
     </div>

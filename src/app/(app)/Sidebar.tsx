@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { href: "/service-companies", label: "Service Companies" },
   { href: "/parts", label: "Parts Inventory" },
   { href: "/shipments", label: "Shipments" },
+  { href: "/reports", label: "Reports" },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -72,7 +73,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile/tablet top bar */}
-      <div className="lg:hidden bg-charcoal">
+      <div className="no-print lg:hidden bg-charcoal">
         <div className="flex items-center justify-between px-4 py-3">
           <BrandMark />
           <button
@@ -119,7 +120,7 @@ export default function Sidebar() {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 bg-charcoal min-h-screen sticky top-0">
+      <aside className="no-print hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 bg-charcoal min-h-screen sticky top-0">
         <div className="px-4 py-4 border-b border-white/10">
           <BrandMark />
         </div>

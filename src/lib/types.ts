@@ -97,6 +97,11 @@ export interface ServiceRequestWithJoins extends ServiceRequest {
   city: string | null;
   province: string | null;
   service_company_name: string | null;
+  location_address?: string | null;
+  location_postal_code?: string | null;
+  location_phone?: string | null;
+  service_company_phone?: string | null;
+  service_company_contact?: string | null;
 }
 
 export interface ServiceRequestNote {

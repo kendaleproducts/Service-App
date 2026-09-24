@@ -49,9 +49,16 @@ export default async function ServiceRequestDetailPage({
             {new Date(request.reported_at).toLocaleDateString()}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-start gap-2">
           <Badge label={request.status} />
           <Badge label={request.priority} />
+          <Link
+            href={`/tickets/${request.id}`}
+            target="_blank"
+            className="rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+          >
+            Print Ticket
+          </Link>
         </div>
       </div>
 

@@ -43,3 +43,16 @@ textarea:focus {
   border-color: var(--color-hotsauce);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-hotsauce) 25%, transparent);
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  @page {
+    size: letter;
+    margin: 0.5in;
+  }
+}

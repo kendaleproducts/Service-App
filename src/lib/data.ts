@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { haversineKm } from "./geo";
 import type {
   Customer,
   Location,
@@ -84,6 +85,29 @@ export function getLocation(id: number): Location | undefined {
   return db.prepare("SELECT * FROM locations WHERE id = ?").get(id) as
     | Location
     | undefined;
+}
+
+export function listNearestServiceCompanies(
+  locationId: number,
+  limit = 3
+): (ServiceCompany & { distanceKm: number })[] {
+  const location = getLocation(locationId);
+  if (!location || location.latitude == null || location.longitude == null) {
+    return [];
+  }
+  const candidates = listGeocodedServiceCompanies();
+  return candidates
+    .map((c) => ({
+      ...c,
+      distanceKm: haversineKm(
+        location.latitude as number,
+        location.longitude as number,
+        c.latitude as number,
+        c.longitude as number
+      ),
+    }))
+    .sort((a, b) => a.distanceKm - b.distanceKm)
+    .slice(0, limit);
 }
 
 export function listProvinces(): string[] {
@@ -391,6 +415,9 @@ export function listServiceRequests(filters: {
   priority?: string;
   locationId?: number;
   companyId?: number;
+  province?: string;
+  from?: string;
+  to?: string;
 }): ServiceRequestWithJoins[] {
   const clauses: string[] = [];
   const params: Record<string, string | number> = {};
@@ -414,6 +441,18 @@ export function listServiceRequests(filters: {
     clauses.push("sr.service_company_id = @companyId");
     params.companyId = filters.companyId;
   }
+  if (filters.province) {
+    clauses.push("l.province = @province");
+    params.province = filters.province;
+  }
+  if (filters.from) {
+    clauses.push("date(sr.reported_at) >= date(@from)");
+    params.from = filters.from;
+  }
+  if (filters.to) {
+    clauses.push("date(sr.reported_at) <= date(@to)");
+    params.to = filters.to;
+  }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   return db
     .prepare(
@@ -429,18 +468,86 @@ export function listServiceRequests(filters: {
     .all(params) as ServiceRequestWithJoins[];
 }
 
+export interface ServiceRequestReport {
+  requests: ServiceRequestWithJoins[];
+  totalCount: number;
+  totalCost: number;
+  avgCost: number | null;
+  byStatus: { label: string; count: number }[];
+  byPriority: { label: string; count: number }[];
+  byCompany: { label: string; count: number }[];
+}
+
+export function getServiceRequestReport(filters: {
+  from?: string;
+  to?: string;
+  status?: string;
+  priority?: string;
+  province?: string;
+  companyId?: number;
+}): ServiceRequestReport {
+  const requests = listServiceRequests(filters);
+
+  const countBy = (values: string[]) => {
+    const counts = new Map<string, number>();
+    for (const v of values) counts.set(v, (counts.get(v) ?? 0) + 1);
+    return [...counts.entries()]
+      .map(([label, count]) => ({ label, count }))
+      .sort((a, b) => b.count - a.count);
+  };
+
+  const costs = requests.map((r) => r.cost).filter((c): c is number => c != null);
+  const totalCost = costs.reduce((sum, c) => sum + c, 0);
+
+  return {
+    requests,
+    totalCount: requests.length,
+    totalCost,
+    avgCost: costs.length ? totalCost / costs.length : null,
+    byStatus: countBy(requests.map((r) => r.status)),
+    byPriority: countBy(requests.map((r) => r.priority)),
+    byCompany: countBy(requests.map((r) => r.service_company_name ?? "Unassigned")),
+  };
+}
+
 export function getServiceRequest(id: number): ServiceRequestWithJoins | undefined {
   return db
     .prepare(
       `SELECT sr.*, l.name as location_name, l.store_number as store_number,
               l.city as city, l.province as province,
-              sc.name as service_company_name
+              l.address as location_address, l.postal_code as location_postal_code,
+              l.phone as location_phone,
+              sc.name as service_company_name, sc.phone as service_company_phone,
+              sc.contact_name as service_company_contact
        FROM service_requests sr
        JOIN locations l ON l.id = sr.location_id
        LEFT JOIN service_companies sc ON sc.id = sr.service_company_id
        WHERE sr.id = ?`
     )
     .get(id) as ServiceRequestWithJoins | undefined;
+}
+
+export function listPartsUsedForRequest(requestId: number): {
+  part_number: string;
+  description: string;
+  quantity: number;
+  unit_cost: number | null;
+}[] {
+  return db
+    .prepare(
+      `SELECT p.part_number, p.description, psi.quantity, p.unit_cost
+       FROM part_shipments ps
+       JOIN part_shipment_items psi ON psi.part_shipment_id = ps.id
+       JOIN parts p ON p.id = psi.part_id
+       WHERE ps.service_request_id = ?
+       ORDER BY p.part_number`
+    )
+    .all(requestId) as {
+    part_number: string;
+    description: string;
+    quantity: number;
+    unit_cost: number | null;
+  }[];
 }
 
 export function createServiceRequest(input: {
