@@ -120,7 +120,7 @@ export default function Sidebar() {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="no-print hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 bg-charcoal min-h-screen sticky top-0">
+      <aside className="no-print hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 lg:self-start bg-charcoal min-h-screen sticky top-0">
         <div className="px-4 py-4 border-b border-white/10">
           <BrandMark />
         </div>
