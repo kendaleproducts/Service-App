@@ -7,6 +7,7 @@ import {
   listProvinces,
 } from "@/lib/data";
 import Badge from "@/components/Badge";
+import ClickableRow from "@/components/ClickableRow";
 import LocationsMap from "@/components/LocationsMap";
 import GeocodeButton from "./GeocodeButton";
 import { LOCATION_STATUSES } from "@/lib/types";
@@ -130,7 +131,11 @@ export default async function LocationsPage({
           </thead>
           <tbody>
             {locations.map((loc) => (
-              <tr key={loc.id} className="border-b border-stone-50 last:border-0 hover:bg-stone-50">
+              <ClickableRow
+                key={loc.id}
+                href={`/locations/${loc.id}`}
+                className="border-b border-stone-50 last:border-0 hover:bg-stone-50"
+              >
                 <td className="px-4 py-2">
                   <Link href={`/locations/${loc.id}`} className="text-charcoal hover:underline">
                     {loc.store_number}
@@ -143,7 +148,7 @@ export default async function LocationsPage({
                 <td className="px-4 py-2">
                   <Badge label={loc.status} />
                 </td>
-              </tr>
+              </ClickableRow>
             ))}
             {locations.length === 0 && (
               <tr>

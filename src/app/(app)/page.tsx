@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getDashboardStats } from "@/lib/data";
 import Badge from "@/components/Badge";
+import ClickableRow from "@/components/ClickableRow";
 import LoadDemoDataButton from "./LoadDemoDataButton";
 
 export const dynamic = "force-dynamic";
@@ -93,8 +94,9 @@ export default async function DashboardPage() {
               </thead>
               <tbody>
                 {stats.recentRequests.map((r) => (
-                  <tr
+                  <ClickableRow
                     key={r.id}
+                    href={`/service-requests/${r.id}`}
                     className="border-b border-stone-50 last:border-0 hover:bg-stone-50"
                   >
                     <td className="px-4 py-2">
@@ -114,7 +116,7 @@ export default async function DashboardPage() {
                     <td className="px-4 py-2 text-stone-600">
                       {r.service_company_name ?? "—"}
                     </td>
-                  </tr>
+                  </ClickableRow>
                 ))}
               </tbody>
             </table>

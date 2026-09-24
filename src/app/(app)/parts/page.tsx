@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listParts } from "@/lib/data";
+import ClickableRow from "@/components/ClickableRow";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +63,11 @@ export default async function PartsPage({
             {parts.map((p) => {
               const low = p.quantity_on_hand <= p.reorder_threshold;
               return (
-                <tr key={p.id} className="border-b border-stone-50 last:border-0 hover:bg-stone-50">
+                <ClickableRow
+                  key={p.id}
+                  href={`/parts/${p.id}`}
+                  className="border-b border-stone-50 last:border-0 hover:bg-stone-50"
+                >
                   <td className="px-4 py-2">
                     <Link href={`/parts/${p.id}`} className="text-charcoal hover:underline">
                       {p.part_number}
@@ -76,7 +81,7 @@ export default async function PartsPage({
                   <td className="px-4 py-2 text-stone-600">
                     {p.unit_cost != null ? `$${p.unit_cost.toFixed(2)}` : "—"}
                   </td>
-                </tr>
+                </ClickableRow>
               );
             })}
             {parts.length === 0 && (

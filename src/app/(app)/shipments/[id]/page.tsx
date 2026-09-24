@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getPartShipment, listShipmentItems } from "@/lib/data";
 import { SHIPMENT_STATUSES } from "@/lib/types";
 import Badge from "@/components/Badge";
+import ClickableRow from "@/components/ClickableRow";
 import { updateShipmentStatusAction } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +51,11 @@ export default async function ShipmentDetailPage({
               </thead>
               <tbody>
                 {items.map((item) => (
-                  <tr key={item.id} className="border-b border-stone-50 last:border-0">
+                  <ClickableRow
+                    key={item.id}
+                    href={`/parts/${item.part_id}`}
+                    className="border-b border-stone-50 last:border-0 hover:bg-stone-50"
+                  >
                     <td className="px-4 py-2">
                       <Link href={`/parts/${item.part_id}`} className="text-charcoal hover:underline">
                         {item.part_number}
@@ -58,7 +63,7 @@ export default async function ShipmentDetailPage({
                     </td>
                     <td className="px-4 py-2 text-stone-600">{item.description}</td>
                     <td className="px-4 py-2 text-stone-600">{item.quantity}</td>
-                  </tr>
+                  </ClickableRow>
                 ))}
               </tbody>
             </table>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listServiceCompanies } from "@/lib/data";
+import ClickableRow from "@/components/ClickableRow";
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +75,11 @@ export default async function ServiceCompaniesPage({
           </thead>
           <tbody>
             {companies.map((c) => (
-              <tr key={c.id} className="border-b border-stone-50 last:border-0 hover:bg-stone-50">
+              <ClickableRow
+                key={c.id}
+                href={`/service-companies/${c.id}`}
+                className="border-b border-stone-50 last:border-0 hover:bg-stone-50"
+              >
                 <td className="px-4 py-2">
                   <Link href={`/service-companies/${c.id}`} className="text-charcoal hover:underline">
                     {c.name}
@@ -84,7 +89,7 @@ export default async function ServiceCompaniesPage({
                 <td className="px-4 py-2 text-stone-600">{c.province ?? "—"}</td>
                 <td className="px-4 py-2 text-stone-600">{c.contact_name ?? "—"}</td>
                 <td className="px-4 py-2 text-stone-600">{c.phone ?? "—"}</td>
-              </tr>
+              </ClickableRow>
             ))}
             {companies.length === 0 && (
               <tr>

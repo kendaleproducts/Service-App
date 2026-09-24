@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listPartShipments } from "@/lib/data";
 import Badge from "@/components/Badge";
+import ClickableRow from "@/components/ClickableRow";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,11 @@ export default async function ShipmentsPage() {
           </thead>
           <tbody>
             {shipments.map((s) => (
-              <tr key={s.id} className="border-b border-stone-50 last:border-0 hover:bg-stone-50">
+              <ClickableRow
+                key={s.id}
+                href={`/shipments/${s.id}`}
+                className="border-b border-stone-50 last:border-0 hover:bg-stone-50"
+              >
                 <td className="px-4 py-2">
                   <Link href={`/shipments/${s.id}`} className="text-charcoal hover:underline">
                     #{s.id}
@@ -53,7 +58,7 @@ export default async function ShipmentsPage() {
                 <td className="px-4 py-2 text-stone-600">
                   {new Date(s.created_at).toLocaleDateString()}
                 </td>
-              </tr>
+              </ClickableRow>
             ))}
             {shipments.length === 0 && (
               <tr>
