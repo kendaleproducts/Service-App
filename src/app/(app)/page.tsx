@@ -46,7 +46,15 @@ export default async function DashboardPage() {
             Mary Brown&apos;s service operations, managed from Fort Erie, ON.
           </p>
         </div>
-        <LoadDemoDataButton />
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/service-requests/new"
+            className="rounded-md bg-hotsauce px-4 py-2 text-sm font-medium text-white hover:bg-hickory"
+          >
+            + New Service Request
+          </Link>
+          <LoadDemoDataButton />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
