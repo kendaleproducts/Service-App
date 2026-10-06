@@ -56,7 +56,7 @@ export default async function PartsPage({
               <th className="px-4 py-2 font-medium">Description</th>
               <th className="px-4 py-2 font-medium">On Hand</th>
               <th className="px-4 py-2 font-medium">Reorder At</th>
-              <th className="px-4 py-2 font-medium">Unit Cost</th>
+              <th className="px-4 py-2 font-medium">Size / Weight</th>
             </tr>
           </thead>
           <tbody>
@@ -78,9 +78,7 @@ export default async function PartsPage({
                     {p.quantity_on_hand}
                   </td>
                   <td className="px-4 py-2 text-stone-600">{p.reorder_threshold}</td>
-                  <td className="px-4 py-2 text-stone-600">
-                    {p.unit_cost != null ? `$${p.unit_cost.toFixed(2)}` : "—"}
-                  </td>
+                  <td className="px-4 py-2 text-stone-600">{p.size_weight ?? "—"}</td>
                 </ClickableRow>
               );
             })}

@@ -14,7 +14,7 @@ export async function createPartAction(formData: FormData) {
     description,
     quantity_on_hand: Number(formData.get("quantity_on_hand") ?? 0),
     reorder_threshold: Number(formData.get("reorder_threshold") ?? 0),
-    unit_cost: formData.get("unit_cost") ? Number(formData.get("unit_cost")) : null,
+    size_weight: String(formData.get("size_weight") ?? "") || null,
     notes: String(formData.get("notes") ?? "") || null,
   });
   revalidatePath("/parts");
@@ -26,7 +26,7 @@ export async function updatePartAction(id: number, formData: FormData) {
     description: String(formData.get("description") ?? "").trim(),
     quantity_on_hand: Number(formData.get("quantity_on_hand") ?? 0),
     reorder_threshold: Number(formData.get("reorder_threshold") ?? 0),
-    unit_cost: formData.get("unit_cost") ? Number(formData.get("unit_cost")) : null,
+    size_weight: String(formData.get("size_weight") ?? "") || null,
     notes: String(formData.get("notes") ?? "") || null,
   });
   revalidatePath(`/parts/${id}`);

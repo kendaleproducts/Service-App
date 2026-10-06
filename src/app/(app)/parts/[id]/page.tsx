@@ -68,13 +68,12 @@ export default async function PartDetailPage({
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-medium text-stone-500 mb-1">
-                Unit Cost ($)
+                Size / Weight
               </label>
               <input
-                name="unit_cost"
-                type="number"
-                step="0.01"
-                defaultValue={part.unit_cost ?? ""}
+                name="size_weight"
+                placeholder="e.g. 10x8x4 in, 3.5 lbs"
+                defaultValue={part.size_weight ?? ""}
                 className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
               />
             </div>

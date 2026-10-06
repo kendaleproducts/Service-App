@@ -69,15 +69,25 @@ export interface Part {
   quantity_on_hand: number;
   reorder_threshold: number;
   unit_cost: number | null;
+  size_weight: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface Equipment {
+  id: number;
+  location_id: number;
+  serial_number: string;
+  description: string | null;
+  created_at: string;
 }
 
 export interface ServiceRequest {
   id: number;
   location_id: number;
   service_company_id: number | null;
+  equipment_id: number | null;
   status: string;
   priority: string;
   equipment_description: string | null;
@@ -97,6 +107,7 @@ export interface ServiceRequestWithJoins extends ServiceRequest {
   city: string | null;
   province: string | null;
   service_company_name: string | null;
+  equipment_serial_number?: string | null;
   location_address?: string | null;
   location_postal_code?: string | null;
   location_phone?: string | null;

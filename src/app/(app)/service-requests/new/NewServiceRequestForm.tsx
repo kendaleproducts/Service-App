@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { haversineKm } from "@/lib/geo";
 import { SERVICE_REQUEST_PRIORITIES } from "@/lib/types";
+import type { Equipment } from "@/lib/types";
 
 interface LocationOption {
   id: number;
@@ -26,11 +27,13 @@ interface CompanyOption {
 
 export default function NewServiceRequestForm({
   action,
+  getEquipmentForLocation,
   locations,
   companies,
   preselectedLocationId,
 }: {
   action: (formData: FormData) => Promise<void>;
+  getEquipmentForLocation: (locationId: number) => Promise<Equipment[]>;
   locations: LocationOption[];
   companies: CompanyOption[];
   preselectedLocationId?: number;
@@ -40,6 +43,21 @@ export default function NewServiceRequestForm({
   );
   const [companyId, setCompanyId] = useState("");
   const [showOtherPicker, setShowOtherPicker] = useState(false);
+
+  const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
+  const [equipmentId, setEquipmentId] = useState("");
+  const [showNewEquipment, setShowNewEquipment] = useState(false);
+  const [newSerial, setNewSerial] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [isLoadingEquipment, startEquipmentTransition] = useTransition();
+
+  useEffect(() => {
+    if (!locationId) return;
+    startEquipmentTransition(async () => {
+      const list = await getEquipmentForLocation(Number(locationId));
+      setEquipmentList(list);
+    });
+  }, [locationId, getEquipmentForLocation]);
 
   const nearestCompanies = useMemo(() => {
     const location = locations.find((l) => String(l.id) === locationId);
@@ -68,6 +86,11 @@ export default function NewServiceRequestForm({
     setShowOtherPicker(false);
   }
 
+  function pickEquipment(id: string) {
+    setEquipmentId(id);
+    setShowNewEquipment(false);
+  }
+
   return (
     <form action={action} className="bg-white border border-stone-200 rounded-lg p-5 space-y-4">
       <div>
@@ -80,6 +103,11 @@ export default function NewServiceRequestForm({
             setLocationId(e.target.value);
             setCompanyId("");
             setShowOtherPicker(false);
+            setEquipmentId("");
+            setShowNewEquipment(false);
+            setNewSerial("");
+            setNewDescription("");
+            setEquipmentList([]);
           }}
           className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
         >
@@ -93,6 +121,97 @@ export default function NewServiceRequestForm({
           ))}
         </select>
       </div>
+
+      {locationId && (
+        <div>
+          <label className="block text-xs font-medium text-stone-500 mb-1">
+            Equipment Being Serviced
+          </label>
+
+          {isLoadingEquipment && (
+            <p className="text-xs text-stone-500">Loading equipment on file...</p>
+          )}
+
+          {!isLoadingEquipment && equipmentList.length > 0 && !showNewEquipment && (
+            <div className="space-y-2">
+              {equipmentList.map((eq) => (
+                <button
+                  key={eq.id}
+                  type="button"
+                  onClick={() => pickEquipment(String(eq.id))}
+                  className={`w-full flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors ${
+                    equipmentId === String(eq.id)
+                      ? "border-hotsauce bg-hotsauce/5"
+                      : "border-stone-300 bg-white hover:bg-stone-50"
+                  }`}
+                >
+                  <span>
+                    <span className="font-medium text-charcoal">{eq.serial_number}</span>
+                    {eq.description && (
+                      <span className="text-stone-500"> — {eq.description}</span>
+                    )}
+                  </span>
+                  {equipmentId === String(eq.id) && (
+                    <span className="text-xs font-medium text-hotsauce shrink-0">Selected</span>
+                  )}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNewEquipment(true);
+                  setEquipmentId("");
+                }}
+                className="w-full rounded-md border border-dashed border-stone-300 px-3 py-2 text-left text-sm text-stone-500 hover:bg-stone-50"
+              >
+                + Add new machine
+              </button>
+            </div>
+          )}
+
+          {!isLoadingEquipment && (showNewEquipment || equipmentList.length === 0) && (
+            <div className="space-y-2">
+              {equipmentList.length === 0 && (
+                <p className="text-xs text-stone-500">
+                  No equipment on file for this location yet. Add the machine being serviced below
+                  — it will be saved to this location for future requests.
+                </p>
+              )}
+              <input
+                name="new_serial_number"
+                required
+                placeholder="Serial number"
+                value={newSerial}
+                onChange={(e) => setNewSerial(e.target.value)}
+                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+              />
+              <input
+                name="equipment_description"
+                required
+                placeholder="Make/model (e.g. Frymaster FPH155 fryer)"
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+              />
+              {equipmentList.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNewEquipment(false);
+                    setNewSerial("");
+                    setNewDescription("");
+                  }}
+                  className="text-xs text-stone-500 hover:text-hotsauce"
+                >
+                  ← Back to equipment on file
+                </button>
+              )}
+            </div>
+          )}
+
+          <input type="hidden" name="equipment_id" value={equipmentId} />
+        </div>
+      )}
 
       {locationId && (
         <div>
@@ -151,11 +270,14 @@ export default function NewServiceRequestForm({
           {useOtherPicker && (
             <div className="space-y-2">
               <select
+                required
                 value={companyId}
                 onChange={(e) => setCompanyId(e.target.value)}
                 className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
               >
-                <option value="">Unassigned</option>
+                <option value="" disabled>
+                  Select a service company...
+                </option>
                 {companies.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -177,21 +299,10 @@ export default function NewServiceRequestForm({
               )}
             </div>
           )}
+
+          <input type="hidden" name="service_company_id" value={companyId} />
         </div>
       )}
-
-      <input type="hidden" name="service_company_id" value={companyId} />
-
-      <div>
-        <label className="block text-xs font-medium text-stone-500 mb-1">
-          Equipment (make/model, optional)
-        </label>
-        <input
-          name="equipment_description"
-          placeholder="e.g. Frymaster FPH155 fryer"
-          className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-        />
-      </div>
 
       <div>
         <label className="block text-xs font-medium text-stone-500 mb-1">
@@ -210,6 +321,7 @@ export default function NewServiceRequestForm({
           <label className="block text-xs font-medium text-stone-500 mb-1">Priority</label>
           <select
             name="priority"
+            required
             defaultValue="Normal"
             className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
           >
@@ -224,16 +336,18 @@ export default function NewServiceRequestForm({
           <label className="block text-xs font-medium text-stone-500 mb-1">Reported By</label>
           <input
             name="reported_by"
+            required
             className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
           />
         </div>
         <div>
           <label className="block text-xs font-medium text-stone-500 mb-1">
-            Scheduled Date (optional)
+            Scheduled Date
           </label>
           <input
             name="scheduled_at"
             type="date"
+            required
             className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
           />
         </div>

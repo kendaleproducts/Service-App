@@ -2,6 +2,7 @@ import { db } from "./db";
 import { haversineKm } from "./geo";
 import type {
   Customer,
+  Equipment,
   Location,
   Part,
   PartShipment,
@@ -377,18 +378,18 @@ export function createPart(input: {
   description: string;
   quantity_on_hand?: number;
   reorder_threshold?: number;
-  unit_cost?: number | null;
+  size_weight?: string | null;
   notes?: string | null;
 }): number {
   const info = db
     .prepare(
-      `INSERT INTO parts (part_number, description, quantity_on_hand, reorder_threshold, unit_cost, notes)
-       VALUES (@part_number, @description, @quantity_on_hand, @reorder_threshold, @unit_cost, @notes)`
+      `INSERT INTO parts (part_number, description, quantity_on_hand, reorder_threshold, size_weight, notes)
+       VALUES (@part_number, @description, @quantity_on_hand, @reorder_threshold, @size_weight, @notes)`
     )
     .run({
       quantity_on_hand: 0,
       reorder_threshold: 0,
-      unit_cost: null,
+      size_weight: null,
       notes: null,
       ...input,
     });
@@ -401,7 +402,7 @@ export function updatePart(
     description: string;
     quantity_on_hand: number;
     reorder_threshold: number;
-    unit_cost: number | null;
+    size_weight: string | null;
     notes: string | null;
   }>
 ): void {
@@ -417,6 +418,43 @@ export function adjustPartQuantity(id: number, delta: number): void {
   db.prepare(
     "UPDATE parts SET quantity_on_hand = quantity_on_hand + ?, updated_at = datetime('now') WHERE id = ?"
   ).run(delta, id);
+}
+
+// ---------- Equipment ----------
+
+export function getEquipment(id: number): Equipment | undefined {
+  return db.prepare("SELECT * FROM equipment WHERE id = ?").get(id) as Equipment | undefined;
+}
+
+export function listEquipmentForLocation(locationId: number): Equipment[] {
+  return db
+    .prepare("SELECT * FROM equipment WHERE location_id = ? ORDER BY created_at DESC")
+    .all(locationId) as Equipment[];
+}
+
+export function getOrCreateEquipment(input: {
+  location_id: number;
+  serial_number: string;
+  description?: string | null;
+}): number {
+  const serial = input.serial_number.trim();
+  const existing = db
+    .prepare(
+      "SELECT id FROM equipment WHERE location_id = @location_id AND lower(trim(serial_number)) = lower(@serial)"
+    )
+    .get({ location_id: input.location_id, serial }) as { id: number } | undefined;
+  if (existing) return existing.id;
+
+  const info = db
+    .prepare(
+      "INSERT INTO equipment (location_id, serial_number, description) VALUES (@location_id, @serial_number, @description)"
+    )
+    .run({
+      location_id: input.location_id,
+      serial_number: serial,
+      description: input.description || null,
+    });
+  return Number(info.lastInsertRowid);
 }
 
 // ---------- Service requests ----------
@@ -530,10 +568,12 @@ export function getServiceRequest(id: number): ServiceRequestWithJoins | undefin
               l.address as location_address, l.postal_code as location_postal_code,
               l.phone as location_phone,
               sc.name as service_company_name, sc.phone as service_company_phone,
-              sc.contact_name as service_company_contact
+              sc.contact_name as service_company_contact,
+              e.serial_number as equipment_serial_number
        FROM service_requests sr
        JOIN locations l ON l.id = sr.location_id
        LEFT JOIN service_companies sc ON sc.id = sr.service_company_id
+       LEFT JOIN equipment e ON e.id = sr.equipment_id
        WHERE sr.id = ?`
     )
     .get(id) as ServiceRequestWithJoins | undefined;
@@ -543,11 +583,11 @@ export function listPartsUsedForRequest(requestId: number): {
   part_number: string;
   description: string;
   quantity: number;
-  unit_cost: number | null;
+  size_weight: string | null;
 }[] {
   return db
     .prepare(
-      `SELECT p.part_number, p.description, psi.quantity, p.unit_cost
+      `SELECT p.part_number, p.description, psi.quantity, p.size_weight
        FROM part_shipments ps
        JOIN part_shipment_items psi ON psi.part_shipment_id = ps.id
        JOIN parts p ON p.id = psi.part_id
@@ -558,13 +598,14 @@ export function listPartsUsedForRequest(requestId: number): {
     part_number: string;
     description: string;
     quantity: number;
-    unit_cost: number | null;
+    size_weight: string | null;
   }[];
 }
 
 export function createServiceRequest(input: {
   location_id: number;
   service_company_id?: number | null;
+  equipment_id?: number | null;
   status?: string;
   priority?: string;
   equipment_description?: string | null;
@@ -575,11 +616,12 @@ export function createServiceRequest(input: {
   const info = db
     .prepare(
       `INSERT INTO service_requests
-        (location_id, service_company_id, status, priority, equipment_description, issue_description, reported_by, scheduled_at)
-       VALUES (@location_id, @service_company_id, @status, @priority, @equipment_description, @issue_description, @reported_by, @scheduled_at)`
+        (location_id, service_company_id, equipment_id, status, priority, equipment_description, issue_description, reported_by, scheduled_at)
+       VALUES (@location_id, @service_company_id, @equipment_id, @status, @priority, @equipment_description, @issue_description, @reported_by, @scheduled_at)`
     )
     .run({
       service_company_id: null,
+      equipment_id: null,
       status: "New",
       priority: "Normal",
       equipment_description: null,

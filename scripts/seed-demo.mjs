@@ -90,34 +90,34 @@ function ensureParts() {
       description: "Fryer thermostat, universal",
       quantity_on_hand: 2,
       reorder_threshold: 5,
-      unit_cost: 45.99,
+      size_weight: "4x3x1 in, 0.5 lbs",
     },
     {
       part_number: "WRM-HTEL-220",
       description: "Holding cabinet heating element, 220V",
       quantity_on_hand: 8,
       reorder_threshold: 3,
-      unit_cost: 89.5,
+      size_weight: "14x3x3 in, 3.6 lbs",
     },
     {
       part_number: "OVN-DOOR-SEAL",
       description: "Convection oven door gasket seal",
       quantity_on_hand: 14,
       reorder_threshold: 4,
-      unit_cost: 22.0,
+      size_weight: "30x24x1 in, 2.2 lbs",
     },
     {
       part_number: "FRZ-COMP-500",
       description: "Reach-in freezer compressor, 1/2 HP",
       quantity_on_hand: 1,
       reorder_threshold: 2,
-      unit_cost: 310.0,
+      size_weight: "12x10x8 in, 22 lbs",
     },
   ];
 
   const insert = db.prepare(
-    `INSERT INTO parts (part_number, description, quantity_on_hand, reorder_threshold, unit_cost)
-     VALUES (@part_number, @description, @quantity_on_hand, @reorder_threshold, @unit_cost)`
+    `INSERT INTO parts (part_number, description, quantity_on_hand, reorder_threshold, size_weight)
+     VALUES (@part_number, @description, @quantity_on_hand, @reorder_threshold, @size_weight)`
   );
   for (const p of parts) insert.run(p);
 }

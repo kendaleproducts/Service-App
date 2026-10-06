@@ -37,63 +37,63 @@ function ensureFryerParts() {
       description: "Pressure fryer lid gasket/seal kit",
       quantity_on_hand: 3,
       reorder_threshold: 6,
-      unit_cost: 38.5,
+      size_weight: "8x6x2 in, 1.2 lbs",
     },
     {
       part_number: "BPF-LID-SW",
       description: "Pressure lid interlock safety switch",
       quantity_on_hand: 5,
       reorder_threshold: 4,
-      unit_cost: 64.0,
+      size_weight: "3x2x2 in, 0.3 lbs",
     },
     {
       part_number: "BPF-PRV-100",
       description: "Pressure relief valve assembly",
       quantity_on_hand: 2,
       reorder_threshold: 3,
-      unit_cost: 92.75,
+      size_weight: "5x4x4 in, 1.8 lbs",
     },
     {
       part_number: "BPF-TSTAT",
       description: "Digital temperature probe / thermostat",
       quantity_on_hand: 7,
       reorder_threshold: 4,
-      unit_cost: 71.2,
+      size_weight: "4x3x1 in, 0.5 lbs",
     },
     {
       part_number: "BPF-TIMER-CTRL",
       description: "Cook cycle timer control board",
       quantity_on_hand: 4,
       reorder_threshold: 3,
-      unit_cost: 215.0,
+      size_weight: "9x7x2 in, 2.1 lbs",
     },
     {
       part_number: "BPF-BASKET-SOL",
       description: "Basket auto-lift solenoid",
       quantity_on_hand: 6,
       reorder_threshold: 3,
-      unit_cost: 58.3,
+      size_weight: "6x4x3 in, 1.4 lbs",
     },
     {
       part_number: "BPF-HTR-ELEM",
       description: "Pressure fryer heating element, 220V",
       quantity_on_hand: 3,
       reorder_threshold: 4,
-      unit_cost: 134.0,
+      size_weight: "14x3x3 in, 3.6 lbs",
     },
     {
       part_number: "BPF-DOOR-HINGE",
       description: "Lid hinge pin & bushing kit",
       quantity_on_hand: 10,
       reorder_threshold: 5,
-      unit_cost: 19.95,
+      size_weight: "6x4x2 in, 0.9 lbs",
     },
   ];
 
   const findByNumber = db.prepare("SELECT id FROM parts WHERE part_number = ?");
   const insert = db.prepare(
-    `INSERT INTO parts (part_number, description, quantity_on_hand, reorder_threshold, unit_cost)
-     VALUES (@part_number, @description, @quantity_on_hand, @reorder_threshold, @unit_cost)`
+    `INSERT INTO parts (part_number, description, quantity_on_hand, reorder_threshold, size_weight)
+     VALUES (@part_number, @description, @quantity_on_hand, @reorder_threshold, @size_weight)`
   );
 
   const ids = {};

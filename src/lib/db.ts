@@ -54,3 +54,5 @@ addColumnIfMissing("service_companies", "latitude", "REAL");
 addColumnIfMissing("service_companies", "longitude", "REAL");
 addColumnIfMissing("locations", "latitude", "REAL");
 addColumnIfMissing("locations", "longitude", "REAL");
+addColumnIfMissing("parts", "size_weight", "TEXT");
+addColumnIfMissing("service_requests", "equipment_id", "INTEGER REFERENCES equipment(id)");

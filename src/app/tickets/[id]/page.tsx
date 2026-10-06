@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getServiceRequest, listPartsUsedForRequest } from "@/lib/data";
+import { getServiceRequest, listPartsUsedForRequest, listShipmentsForRequest } from "@/lib/data";
 import FlameMark from "@/components/FlameMark";
 import PrintButton from "@/components/PrintButton";
 
@@ -24,9 +24,10 @@ export default async function ServiceTicketPage({
   if (!request) notFound();
 
   const parts = listPartsUsedForRequest(request.id);
-  const partsCost = parts.reduce((sum, p) => sum + (p.unit_cost ?? 0) * p.quantity, 0);
   const serviceCost = request.cost ?? 0;
-  const grandTotal = serviceCost + partsCost;
+  const trackedShipments = listShipmentsForRequest(request.id).filter(
+    (s) => s.tracking_number && s.tracking_number.trim()
+  );
 
   return (
     <div className="min-h-screen bg-stone-100 py-8 print:bg-white print:py-0">
@@ -117,9 +118,8 @@ export default async function ServiceTicketPage({
             <tr className="text-left text-stone-500 border-b border-stone-200">
               <th className="py-2 font-medium">Part #</th>
               <th className="py-2 font-medium">Description</th>
+              <th className="py-2 font-medium">Size / Weight</th>
               <th className="py-2 font-medium text-right">Qty</th>
-              <th className="py-2 font-medium text-right">Unit Cost</th>
-              <th className="py-2 font-medium text-right">Total</th>
             </tr>
           </thead>
           <tbody>
@@ -127,18 +127,13 @@ export default async function ServiceTicketPage({
               <tr key={i} className="border-b border-stone-100">
                 <td className="py-2">{p.part_number}</td>
                 <td className="py-2">{p.description}</td>
+                <td className="py-2">{p.size_weight ?? "—"}</td>
                 <td className="py-2 text-right">{p.quantity}</td>
-                <td className="py-2 text-right">
-                  {p.unit_cost != null ? `$${p.unit_cost.toFixed(2)}` : "—"}
-                </td>
-                <td className="py-2 text-right">
-                  {p.unit_cost != null ? `$${(p.unit_cost * p.quantity).toFixed(2)}` : "—"}
-                </td>
               </tr>
             ))}
             {parts.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-3 text-stone-500">
+                <td colSpan={4} className="py-3 text-stone-500">
                   No parts shipped for this request.
                 </td>
               </tr>
@@ -146,19 +141,27 @@ export default async function ServiceTicketPage({
           </tbody>
         </table>
 
+        {trackedShipments.length > 0 && (
+          <div className="mb-6">
+            <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">
+              Shipment Tracking
+            </p>
+            <ul className="space-y-0.5">
+              {trackedShipments.map((s) => (
+                <li key={s.id}>
+                  {s.carrier ? `${s.carrier} — ` : ""}
+                  {s.tracking_number}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="flex justify-end">
           <div className="w-64 text-sm">
-            <div className="flex justify-between py-1">
-              <span className="text-stone-600">Service Cost</span>
-              <span>${serviceCost.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between py-1">
-              <span className="text-stone-600">Parts Cost</span>
-              <span>${partsCost.toFixed(2)}</span>
-            </div>
             <div className="flex justify-between py-2 border-t border-stone-300 font-semibold text-base">
-              <span>Total</span>
-              <span>${grandTotal.toFixed(2)}</span>
+              <span>Service Cost</span>
+              <span>${serviceCost.toFixed(2)}</span>
             </div>
           </div>
         </div>

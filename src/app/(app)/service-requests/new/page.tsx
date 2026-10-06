@@ -1,5 +1,5 @@
 import { listLocations, listServiceCompanies } from "@/lib/data";
-import { createServiceRequestAction } from "../actions";
+import { createServiceRequestAction, getLocationEquipmentAction } from "../actions";
 import NewServiceRequestForm from "./NewServiceRequestForm";
 
 export default async function NewServiceRequestPage({
@@ -17,6 +17,7 @@ export default async function NewServiceRequestPage({
       <h1 className="text-2xl font-semibold text-charcoal">New Service Request</h1>
       <NewServiceRequestForm
         action={createServiceRequestAction}
+        getEquipmentForLocation={getLocationEquipmentAction}
         locations={locations}
         companies={companies}
         preselectedLocationId={preselected}

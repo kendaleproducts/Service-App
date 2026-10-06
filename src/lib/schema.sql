@@ -53,15 +53,26 @@ CREATE TABLE IF NOT EXISTS parts (
   quantity_on_hand INTEGER NOT NULL DEFAULT 0,
   reorder_threshold INTEGER NOT NULL DEFAULT 0,
   unit_cost REAL,
+  size_weight TEXT,
   notes TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS equipment (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  location_id INTEGER NOT NULL REFERENCES locations(id),
+  serial_number TEXT NOT NULL,
+  description TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_equipment_location ON equipment(location_id);
+
 CREATE TABLE IF NOT EXISTS service_requests (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   location_id INTEGER NOT NULL REFERENCES locations(id),
   service_company_id INTEGER REFERENCES service_companies(id),
+  equipment_id INTEGER REFERENCES equipment(id),
   status TEXT NOT NULL DEFAULT 'New',
   priority TEXT NOT NULL DEFAULT 'Normal',
   equipment_description TEXT,
