@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPart, listShipmentsForPart } from "@/lib/data";
 import Badge from "@/components/Badge";
+import BackLink from "@/components/BackLink";
 import { updatePartAction } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -21,9 +22,7 @@ export default async function PartDetailPage({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/parts" className="text-sm text-stone-500 hover:text-hotsauce">
-          ← Back to parts
-        </Link>
+        <BackLink fallbackHref="/parts" label="Back to parts" />
         <h1 className="text-2xl font-semibold text-charcoal mt-1">{part.part_number}</h1>
         <p className="text-sm text-stone-500">{part.description}</p>
       </div>

@@ -1,10 +1,14 @@
 import { LOCATION_STATUSES } from "@/lib/types";
+import BackLink from "@/components/BackLink";
 import { createLocationAction } from "../actions";
 
 export default function NewLocationPage() {
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold text-charcoal">Add Location</h1>
+      <div>
+        <BackLink fallbackHref="/locations" label="Back to locations" />
+        <h1 className="text-2xl font-semibold text-charcoal mt-1">Add Location</h1>
+      </div>
       <form
         action={createLocationAction}
         className="bg-white border border-stone-200 rounded-lg p-5 space-y-4"

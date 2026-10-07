@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getServiceRequest, listPartsUsedForRequest, listShipmentsForRequest } from "@/lib/data";
+import BackLink from "@/components/BackLink";
 import FlameMark from "@/components/FlameMark";
 import PrintButton from "@/components/PrintButton";
 
@@ -31,7 +32,8 @@ export default async function ServiceTicketPage({
 
   return (
     <div className="min-h-screen bg-stone-100 py-8 print:bg-white print:py-0">
-      <div className="no-print max-w-[8.5in] mx-auto mb-4 flex justify-end">
+      <div className="no-print max-w-[8.5in] mx-auto mb-4 flex items-center justify-between">
+        <BackLink fallbackHref={`/service-requests/${request.id}`} label="Back to service request" />
         <PrintButton label="Print Ticket" />
       </div>
 

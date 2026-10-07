@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getPartShipment, listShipmentItems } from "@/lib/data";
 import { SHIPMENT_STATUSES } from "@/lib/types";
 import Badge from "@/components/Badge";
+import BackLink from "@/components/BackLink";
 import ClickableRow from "@/components/ClickableRow";
 import { updateShipmentStatusAction } from "../actions";
 
@@ -24,9 +25,7 @@ export default async function ShipmentDetailPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link href="/shipments" className="text-sm text-stone-500 hover:text-hotsauce">
-            ← Back to shipments
-          </Link>
+          <BackLink fallbackHref="/shipments" label="Back to shipments" />
           <h1 className="text-2xl font-semibold text-charcoal mt-1">Shipment #{shipment.id}</h1>
           <p className="text-sm text-stone-500">
             To {shipment.location_name ?? shipment.service_company_name ?? "Unknown destination"}

@@ -8,6 +8,7 @@ import {
 } from "@/lib/data";
 import { SERVICE_REQUEST_PRIORITIES, SERVICE_REQUEST_STATUSES } from "@/lib/types";
 import Badge from "@/components/Badge";
+import BackLink from "@/components/BackLink";
 import { addNoteAction, updateServiceRequestAction } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -36,9 +37,7 @@ export default async function ServiceRequestDetailPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Link href="/service-requests" className="text-sm text-stone-500 hover:text-hotsauce">
-            ← Back to service requests
-          </Link>
+          <BackLink fallbackHref="/service-requests" label="Back to service requests" />
           <h1 className="text-2xl font-semibold text-charcoal mt-1">
             <Link href={`/locations/${request.location_id}`} className="hover:underline">
               #{request.store_number} {request.location_name}

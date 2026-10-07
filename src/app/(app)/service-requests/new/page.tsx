@@ -1,4 +1,5 @@
 import { listLocations, listServiceCompanies } from "@/lib/data";
+import BackLink from "@/components/BackLink";
 import { createServiceRequestAction, getLocationEquipmentAction } from "../actions";
 import NewServiceRequestForm from "./NewServiceRequestForm";
 
@@ -14,7 +15,10 @@ export default async function NewServiceRequestPage({
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold text-charcoal">New Service Request</h1>
+      <div>
+        <BackLink fallbackHref="/service-requests" label="Back to service requests" />
+        <h1 className="text-2xl font-semibold text-charcoal mt-1">New Service Request</h1>
+      </div>
       <NewServiceRequestForm
         action={createServiceRequestAction}
         getEquipmentForLocation={getLocationEquipmentAction}

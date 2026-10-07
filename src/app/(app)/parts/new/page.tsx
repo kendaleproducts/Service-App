@@ -1,9 +1,13 @@
+import BackLink from "@/components/BackLink";
 import { createPartAction } from "../actions";
 
 export default function NewPartPage() {
   return (
     <div className="max-w-xl space-y-6">
-      <h1 className="text-2xl font-semibold text-charcoal">Add Part</h1>
+      <div>
+        <BackLink fallbackHref="/parts" label="Back to parts" />
+        <h1 className="text-2xl font-semibold text-charcoal mt-1">Add Part</h1>
+      </div>
       <form action={createPartAction} className="bg-white border border-stone-200 rounded-lg p-5 space-y-4">
         <div>
           <label className="block text-xs font-medium text-stone-500 mb-1">Part Number</label>

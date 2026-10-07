@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getLocation, listNearestServiceCompanies, listServiceRequests } from "@/lib/data";
 import { LOCATION_STATUSES } from "@/lib/types";
 import Badge from "@/components/Badge";
+import BackLink from "@/components/BackLink";
 import { updateLocationAction } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +25,8 @@ export default async function LocationDetailPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm text-stone-500">Store #{location.store_number}</p>
+          <BackLink fallbackHref="/locations" label="Back to locations" />
+          <p className="text-sm text-stone-500 mt-1">Store #{location.store_number}</p>
           <h1 className="text-2xl font-semibold text-charcoal">{location.name}</h1>
         </div>
         <Link

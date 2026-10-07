@@ -5,6 +5,7 @@ import {
   listServiceCompanies,
 } from "@/lib/data";
 import { SHIPMENT_STATUSES } from "@/lib/types";
+import BackLink from "@/components/BackLink";
 import ShipmentItemsField from "../ShipmentItemsField";
 import { createShipmentAction } from "../actions";
 
@@ -23,7 +24,10 @@ export default async function NewShipmentPage({
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold text-charcoal">Ship Parts</h1>
+      <div>
+        <BackLink fallbackHref="/shipments" label="Back to shipments" />
+        <h1 className="text-2xl font-semibold text-charcoal mt-1">Ship Parts</h1>
+      </div>
       <form action={createShipmentAction} className="bg-white border border-stone-200 rounded-lg p-5 space-y-4">
         {serviceRequestId && (
           <input type="hidden" name="service_request_id" value={serviceRequestId} />

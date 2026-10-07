@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServiceCompany, listServiceRequests } from "@/lib/data";
 import Badge from "@/components/Badge";
+import BackLink from "@/components/BackLink";
 import CompanyForm from "../CompanyForm";
 import { updateServiceCompanyAction } from "../actions";
 
@@ -22,9 +23,7 @@ export default async function ServiceCompanyDetailPage({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/service-companies" className="text-sm text-stone-500 hover:text-hotsauce">
-          ← Back to service companies
-        </Link>
+        <BackLink fallbackHref="/service-companies" label="Back to service companies" />
         <h1 className="text-2xl font-semibold text-charcoal mt-1">{company.name}</h1>
         {(company.city || company.province) && (
           <p className="text-sm text-stone-500">
