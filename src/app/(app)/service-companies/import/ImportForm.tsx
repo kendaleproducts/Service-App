@@ -7,7 +7,9 @@ export default function ImportForm({ allowReplace }: { allowReplace: boolean }) 
   return (
     <SpreadsheetImportForm
       action={runServiceCompanyImport}
-      helpText='Accepts either format: Name, Location ("lat, long"), Street, City, State/Region, Country, Postal Code — or Company Name, Contact Name, Phone, Email, Coverage Area, Notes. Column names are matched flexibly. Matched and updated by name + postal code, so the same company can have multiple regional branches.'
+      helpText={
+        'Accepts either format: Name, Location ("lat, long"), Street, City, State/Region, Country, Postal Code — or Company Name, Contact Name, Phone, Email, Coverage Area, Notes. Coordinates can also be in separate Latitude/Longitude columns instead of one combined column — either way, they\'re what puts a company on the Locations map. Column names are matched flexibly. Matched and updated by name + postal code, so the same company can have multiple regional branches.'
+      }
       replaceOption={
         allowReplace
           ? {

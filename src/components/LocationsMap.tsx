@@ -66,7 +66,7 @@ function LoadedMap({
   });
 
   const [showStores, setShowStores] = useState(true);
-  const [showVendors, setShowVendors] = useState(vendors.length > 0 && locations.length === 0);
+  const [showVendors, setShowVendors] = useState(true);
   const [statusFilter, setStatusFilter] = useState<Set<string>>(new Set(LOCATION_STATUSES));
   const [selected, setSelected] = useState<Selection | null>(null);
 

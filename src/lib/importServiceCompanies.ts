@@ -45,8 +45,13 @@ function str(raw: unknown): string | null {
 }
 
 function parseLatLong(raw: unknown): { latitude: number | null; longitude: number | null } {
-  const s = String(raw ?? "").trim();
-  const match = s.match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
+  // Strip wrapping parentheses/brackets (e.g. "(43.1, -79.2)") and accept
+  // either a comma or semicolon between the two numbers.
+  const s = String(raw ?? "")
+    .trim()
+    .replace(/^[([]\s*/, "")
+    .replace(/\s*[)\]]$/, "");
+  const match = s.match(/^(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)$/);
   if (!match) return { latitude: null, longitude: null };
   return { latitude: Number(match[1]), longitude: Number(match[2]) };
 }
@@ -81,6 +86,7 @@ export function importServiceCompaniesFromWorkbook(
   });
 
   const result: ImportResult = { inserted: 0, updated: 0, skipped: 0, errors: [] };
+  let missingCoordinates = 0;
 
   if (mode === "replace") {
     if (rows.length === 0) {
@@ -110,7 +116,23 @@ export function importServiceCompaniesFromWorkbook(
     const phoneKey = findKey(row, ["phone", "phone number", "telephone", "tel"]);
     const emailKey = findKey(row, ["email", "email address"]);
     const coverageKey = findKey(row, ["coverage area", "coverage", "service area"]);
-    const locationKey = findKey(row, ["location", "lat/long", "coordinates"]);
+    const locationKey = findKey(row, [
+      "location",
+      "lat/long",
+      "lat, long",
+      "lat/lng",
+      "latlong",
+      "lat long",
+      "coordinates",
+      "coordinate",
+      "gps",
+      "gps coordinates",
+      "geo",
+      "latitude/longitude",
+      "map location",
+    ]);
+    const latitudeKey = findKey(row, ["latitude", "lat"]);
+    const longitudeKey = findKey(row, ["longitude", "long", "lng", "lon"]);
     const streetKey = findKey(row, ["street", "street address", "address"]);
     const cityKey = findKey(row, ["city"]);
     const provinceKey = findKey(row, ["state/region", "province", "state", "region"]);
@@ -125,9 +147,20 @@ export function importServiceCompaniesFromWorkbook(
       return;
     }
 
-    const { latitude, longitude } = locationKey
+    let { latitude, longitude } = locationKey
       ? parseLatLong(row[locationKey])
       : { latitude: null, longitude: null };
+
+    if (latitude === null && latitudeKey && longitudeKey) {
+      const lat = Number(String(row[latitudeKey] ?? "").trim());
+      const lng = Number(String(row[longitudeKey] ?? "").trim());
+      if (Number.isFinite(lat) && Number.isFinite(lng) && (lat !== 0 || lng !== 0)) {
+        latitude = lat;
+        longitude = lng;
+      }
+    }
+
+    if (latitude === null) missingCoordinates += 1;
 
     try {
       const outcome = upsertServiceCompanyByNameAndPostalCode({
@@ -153,6 +186,15 @@ export function importServiceCompaniesFromWorkbook(
       );
     }
   });
+
+  const importedCount = result.inserted + result.updated;
+  if (missingCoordinates > 0 && importedCount > 0) {
+    result.errors.push(
+      `${missingCoordinates} of ${importedCount} companies were imported without map coordinates, ` +
+        `so they won't appear on the Locations map. Add a "Location" column formatted as "lat, long" ` +
+        `per row (or separate "Latitude"/"Longitude" columns) and re-import to add them.`
+    );
+  }
 
   return result;
 }
