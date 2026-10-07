@@ -32,68 +32,20 @@ if (locationCount === 0) {
 
 function ensureFryerParts() {
   const parts = [
-    {
-      part_number: "BPF-LID-GSKT",
-      description: "Pressure fryer lid gasket/seal kit",
-      quantity_on_hand: 3,
-      reorder_threshold: 6,
-      size_weight: "8x6x2 in, 1.2 lbs",
-    },
-    {
-      part_number: "BPF-LID-SW",
-      description: "Pressure lid interlock safety switch",
-      quantity_on_hand: 5,
-      reorder_threshold: 4,
-      size_weight: "3x2x2 in, 0.3 lbs",
-    },
-    {
-      part_number: "BPF-PRV-100",
-      description: "Pressure relief valve assembly",
-      quantity_on_hand: 2,
-      reorder_threshold: 3,
-      size_weight: "5x4x4 in, 1.8 lbs",
-    },
-    {
-      part_number: "BPF-TSTAT",
-      description: "Digital temperature probe / thermostat",
-      quantity_on_hand: 7,
-      reorder_threshold: 4,
-      size_weight: "4x3x1 in, 0.5 lbs",
-    },
-    {
-      part_number: "BPF-TIMER-CTRL",
-      description: "Cook cycle timer control board",
-      quantity_on_hand: 4,
-      reorder_threshold: 3,
-      size_weight: "9x7x2 in, 2.1 lbs",
-    },
-    {
-      part_number: "BPF-BASKET-SOL",
-      description: "Basket auto-lift solenoid",
-      quantity_on_hand: 6,
-      reorder_threshold: 3,
-      size_weight: "6x4x3 in, 1.4 lbs",
-    },
-    {
-      part_number: "BPF-HTR-ELEM",
-      description: "Pressure fryer heating element, 220V",
-      quantity_on_hand: 3,
-      reorder_threshold: 4,
-      size_weight: "14x3x3 in, 3.6 lbs",
-    },
-    {
-      part_number: "BPF-DOOR-HINGE",
-      description: "Lid hinge pin & bushing kit",
-      quantity_on_hand: 10,
-      reorder_threshold: 5,
-      size_weight: "6x4x2 in, 0.9 lbs",
-    },
+    { part_number: "BPF-LID-GSKT", description: "Pressure fryer lid gasket/seal kit" },
+    { part_number: "BPF-LID-SW", description: "Pressure lid interlock safety switch" },
+    { part_number: "BPF-PRV-100", description: "Pressure relief valve assembly" },
+    { part_number: "BPF-TSTAT", description: "Digital temperature probe / thermostat" },
+    { part_number: "BPF-TIMER-CTRL", description: "Cook cycle timer control board" },
+    { part_number: "BPF-BASKET-SOL", description: "Basket auto-lift solenoid" },
+    { part_number: "BPF-HTR-ELEM", description: "Pressure fryer heating element, 220V" },
+    { part_number: "BPF-DOOR-HINGE", description: "Lid hinge pin & bushing kit" },
   ];
 
   const findByNumber = db.prepare("SELECT id FROM parts WHERE part_number = ?");
   const insert = db.prepare(
-    `INSERT INTO parts (part_number, description, quantity_on_hand, reorder_threshold, size_weight)
-     VALUES (@part_number, @description, @quantity_on_hand, @reorder_threshold, @size_weight)`
+    `INSERT INTO parts (part_number, description)
+     VALUES (@part_number, @description)`
   );
 
   const ids = {};
@@ -249,9 +201,6 @@ scenarios.forEach((scenario, i) => {
     db.prepare(
       "INSERT INTO part_shipment_items (part_shipment_id, part_id, quantity) VALUES (?, ?, 1)"
     ).run(shipmentId, partIds[scenario.ship]);
-    db.prepare(
-      "UPDATE parts SET quantity_on_hand = quantity_on_hand - 1 WHERE id = ?"
-    ).run(partIds[scenario.ship]);
   }
 
   console.log(`Created request at #${location.store_number} ${location.name} (${location.province}): ${scenario.issue_description.slice(0, 60)}...`);

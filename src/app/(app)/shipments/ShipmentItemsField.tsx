@@ -23,7 +23,7 @@ export default function ShipmentItemsField({ parts }: { parts: Part[] }) {
             </option>
             {parts.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.part_number} — {p.description} ({p.quantity_on_hand} on hand)
+                {p.part_number} — {p.description}
               </option>
             ))}
           </select>

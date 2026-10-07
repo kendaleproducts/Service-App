@@ -118,7 +118,6 @@ export default async function ServiceTicketPage({
             <tr className="text-left text-stone-500 border-b border-stone-200">
               <th className="py-2 font-medium">Part #</th>
               <th className="py-2 font-medium">Description</th>
-              <th className="py-2 font-medium">Size / Weight</th>
               <th className="py-2 font-medium text-right">Qty</th>
             </tr>
           </thead>
@@ -127,13 +126,12 @@ export default async function ServiceTicketPage({
               <tr key={i} className="border-b border-stone-100">
                 <td className="py-2">{p.part_number}</td>
                 <td className="py-2">{p.description}</td>
-                <td className="py-2">{p.size_weight ?? "—"}</td>
                 <td className="py-2 text-right">{p.quantity}</td>
               </tr>
             ))}
             {parts.length === 0 && (
               <tr>
-                <td colSpan={4} className="py-3 text-stone-500">
+                <td colSpan={3} className="py-3 text-stone-500">
                   No parts shipped for this request.
                 </td>
               </tr>

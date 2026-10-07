@@ -57,18 +57,12 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Open Requests" value={stats.openRequests} href="/service-requests" />
         <StatCard
           label="Urgent"
           value={stats.urgentRequests}
           href="/service-requests?priority=Urgent"
-          highlight
-        />
-        <StatCard
-          label="Low Stock Parts"
-          value={stats.lowStockParts}
-          href="/parts?lowStock=1"
           highlight
         />
         <StatCard

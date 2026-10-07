@@ -17,7 +17,6 @@ export default async function PartDetailPage({
 
   const shipments = listShipmentsForPart(part.id);
   const updateWithId = updatePartAction.bind(null, part.id);
-  const low = part.quantity_on_hand <= part.reorder_threshold;
 
   return (
     <div className="space-y-6">
@@ -25,67 +24,20 @@ export default async function PartDetailPage({
         <Link href="/parts" className="text-sm text-stone-500 hover:text-hotsauce">
           ← Back to parts
         </Link>
-        <div className="flex items-center gap-3 mt-1">
-          <h1 className="text-2xl font-semibold text-charcoal">{part.part_number}</h1>
-          {low && <Badge label="Low Stock" />}
-        </div>
+        <h1 className="text-2xl font-semibold text-charcoal mt-1">{part.part_number}</h1>
         <p className="text-sm text-stone-500">{part.description}</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
         <form action={updateWithId} className="bg-white border border-stone-200 rounded-lg p-5 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2">
-              <label className="block text-xs font-medium text-stone-500 mb-1">Description</label>
-              <input
-                name="description"
-                defaultValue={part.description}
-                required
-                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">
-                Quantity On Hand
-              </label>
-              <input
-                name="quantity_on_hand"
-                type="number"
-                defaultValue={part.quantity_on_hand}
-                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-stone-500 mb-1">
-                Reorder Threshold
-              </label>
-              <input
-                name="reorder_threshold"
-                type="number"
-                defaultValue={part.reorder_threshold}
-                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="block text-xs font-medium text-stone-500 mb-1">
-                Size / Weight
-              </label>
-              <input
-                name="size_weight"
-                placeholder="e.g. 10x8x4 in, 3.5 lbs"
-                defaultValue={part.size_weight ?? ""}
-                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="block text-xs font-medium text-stone-500 mb-1">Notes</label>
-              <textarea
-                name="notes"
-                rows={3}
-                defaultValue={part.notes ?? ""}
-                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-stone-500 mb-1">Description</label>
+            <input
+              name="description"
+              defaultValue={part.description}
+              required
+              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+            />
           </div>
           <button
             type="submit"

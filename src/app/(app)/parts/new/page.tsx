@@ -5,61 +5,21 @@ export default function NewPartPage() {
     <div className="max-w-xl space-y-6">
       <h1 className="text-2xl font-semibold text-charcoal">Add Part</h1>
       <form action={createPartAction} className="bg-white border border-stone-200 rounded-lg p-5 space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Part Number</label>
-            <input
-              name="part_number"
-              required
-              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Size / Weight</label>
-            <input
-              name="size_weight"
-              placeholder="e.g. 10x8x4 in, 3.5 lbs"
-              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="col-span-2">
-            <label className="block text-xs font-medium text-stone-500 mb-1">Description</label>
-            <input
-              name="description"
-              required
-              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">
-              Quantity On Hand
-            </label>
-            <input
-              name="quantity_on_hand"
-              type="number"
-              defaultValue={0}
-              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">
-              Reorder Threshold
-            </label>
-            <input
-              name="reorder_threshold"
-              type="number"
-              defaultValue={0}
-              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="col-span-2">
-            <label className="block text-xs font-medium text-stone-500 mb-1">Notes</label>
-            <textarea
-              name="notes"
-              rows={3}
-              className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
-            />
-          </div>
+        <div>
+          <label className="block text-xs font-medium text-stone-500 mb-1">Part Number</label>
+          <input
+            name="part_number"
+            required
+            className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-stone-500 mb-1">Description</label>
+          <input
+            name="description"
+            required
+            className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+          />
         </div>
         <button
           type="submit"

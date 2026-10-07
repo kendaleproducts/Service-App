@@ -361,14 +361,6 @@ export function listParts(q?: string): Part[] {
   return db.prepare("SELECT * FROM parts ORDER BY part_number").all() as Part[];
 }
 
-export function listLowStockParts(): Part[] {
-  return db
-    .prepare(
-      "SELECT * FROM parts WHERE quantity_on_hand <= reorder_threshold ORDER BY part_number"
-    )
-    .all() as Part[];
-}
-
 export function getPart(id: number): Part | undefined {
   return db.prepare("SELECT * FROM parts WHERE id = ?").get(id) as Part | undefined;
 }
@@ -376,20 +368,14 @@ export function getPart(id: number): Part | undefined {
 export function createPart(input: {
   part_number: string;
   description: string;
-  quantity_on_hand?: number;
-  reorder_threshold?: number;
-  size_weight?: string | null;
   notes?: string | null;
 }): number {
   const info = db
     .prepare(
-      `INSERT INTO parts (part_number, description, quantity_on_hand, reorder_threshold, size_weight, notes)
-       VALUES (@part_number, @description, @quantity_on_hand, @reorder_threshold, @size_weight, @notes)`
+      `INSERT INTO parts (part_number, description, notes)
+       VALUES (@part_number, @description, @notes)`
     )
     .run({
-      quantity_on_hand: 0,
-      reorder_threshold: 0,
-      size_weight: null,
       notes: null,
       ...input,
     });
@@ -400,9 +386,6 @@ export function updatePart(
   id: number,
   input: Partial<{
     description: string;
-    quantity_on_hand: number;
-    reorder_threshold: number;
-    size_weight: string | null;
     notes: string | null;
   }>
 ): void {
@@ -412,12 +395,6 @@ export function updatePart(
   db.prepare(
     `UPDATE parts SET ${setClause}, updated_at = datetime('now') WHERE id = @id`
   ).run({ ...input, id });
-}
-
-export function adjustPartQuantity(id: number, delta: number): void {
-  db.prepare(
-    "UPDATE parts SET quantity_on_hand = quantity_on_hand + ?, updated_at = datetime('now') WHERE id = ?"
-  ).run(delta, id);
 }
 
 // ---------- Equipment ----------
@@ -583,11 +560,10 @@ export function listPartsUsedForRequest(requestId: number): {
   part_number: string;
   description: string;
   quantity: number;
-  size_weight: string | null;
 }[] {
   return db
     .prepare(
-      `SELECT p.part_number, p.description, psi.quantity, p.size_weight
+      `SELECT p.part_number, p.description, psi.quantity
        FROM part_shipments ps
        JOIN part_shipment_items psi ON psi.part_shipment_id = ps.id
        JOIN parts p ON p.id = psi.part_id
@@ -598,7 +574,6 @@ export function listPartsUsedForRequest(requestId: number): {
     part_number: string;
     description: string;
     quantity: number;
-    size_weight: string | null;
   }[];
 }
 
@@ -772,13 +747,9 @@ export function createPartShipment(
     const insertItem = db.prepare(
       "INSERT INTO part_shipment_items (part_shipment_id, part_id, quantity) VALUES (?, ?, ?)"
     );
-    const decrementPart = db.prepare(
-      "UPDATE parts SET quantity_on_hand = quantity_on_hand - ?, updated_at = datetime('now') WHERE id = ?"
-    );
     for (const item of items) {
       if (item.quantity <= 0) continue;
       insertItem.run(shipmentId, item.part_id, item.quantity);
-      decrementPart.run(item.quantity, item.part_id);
     }
     return shipmentId;
   });
@@ -843,9 +814,6 @@ export function getDashboardStats() {
       "SELECT COUNT(*) as c FROM service_requests WHERE priority = 'Urgent' AND status NOT IN ('Completed', 'Cancelled')"
     )
     .get() as { c: number };
-  const lowStockParts = db
-    .prepare("SELECT COUNT(*) as c FROM parts WHERE quantity_on_hand <= reorder_threshold")
-    .get() as { c: number };
   const shipmentsInTransit = db
     .prepare("SELECT COUNT(*) as c FROM part_shipments WHERE status = 'Shipped'")
     .get() as { c: number };
@@ -867,7 +835,6 @@ export function getDashboardStats() {
   return {
     openRequests: openRequests.c,
     urgentRequests: urgentRequests.c,
-    lowStockParts: lowStockParts.c,
     shipmentsInTransit: shipmentsInTransit.c,
     totalLocations: totalLocations.c,
     recentRequests,

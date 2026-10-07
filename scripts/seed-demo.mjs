@@ -85,39 +85,15 @@ function ensureParts() {
   if (count > 0) return;
 
   const parts = [
-    {
-      part_number: "FRY-THRM-100",
-      description: "Fryer thermostat, universal",
-      quantity_on_hand: 2,
-      reorder_threshold: 5,
-      size_weight: "4x3x1 in, 0.5 lbs",
-    },
-    {
-      part_number: "WRM-HTEL-220",
-      description: "Holding cabinet heating element, 220V",
-      quantity_on_hand: 8,
-      reorder_threshold: 3,
-      size_weight: "14x3x3 in, 3.6 lbs",
-    },
-    {
-      part_number: "OVN-DOOR-SEAL",
-      description: "Convection oven door gasket seal",
-      quantity_on_hand: 14,
-      reorder_threshold: 4,
-      size_weight: "30x24x1 in, 2.2 lbs",
-    },
-    {
-      part_number: "FRZ-COMP-500",
-      description: "Reach-in freezer compressor, 1/2 HP",
-      quantity_on_hand: 1,
-      reorder_threshold: 2,
-      size_weight: "12x10x8 in, 22 lbs",
-    },
+    { part_number: "FRY-THRM-100", description: "Fryer thermostat, universal" },
+    { part_number: "WRM-HTEL-220", description: "Holding cabinet heating element, 220V" },
+    { part_number: "OVN-DOOR-SEAL", description: "Convection oven door gasket seal" },
+    { part_number: "FRZ-COMP-500", description: "Reach-in freezer compressor, 1/2 HP" },
   ];
 
   const insert = db.prepare(
-    `INSERT INTO parts (part_number, description, quantity_on_hand, reorder_threshold, size_weight)
-     VALUES (@part_number, @description, @quantity_on_hand, @reorder_threshold, @size_weight)`
+    `INSERT INTO parts (part_number, description)
+     VALUES (@part_number, @description)`
   );
   for (const p of parts) insert.run(p);
 }
@@ -173,9 +149,6 @@ function ensureServiceRequests() {
   db.prepare(
     "INSERT INTO part_shipment_items (part_shipment_id, part_id, quantity) VALUES (?, ?, 1)"
   ).run(shipmentId, fryerThermostat.id);
-  db.prepare(
-    "UPDATE parts SET quantity_on_hand = quantity_on_hand - 1 WHERE id = ?"
-  ).run(fryerThermostat.id);
 
   insertRequest.run({
     location_id: locations[1 % locations.length].id,

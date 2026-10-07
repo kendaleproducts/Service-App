@@ -9,14 +9,7 @@ export async function createPartAction(formData: FormData) {
   const description = String(formData.get("description") ?? "").trim();
   if (!part_number || !description) throw new Error("Part number and description are required");
 
-  const id = createPart({
-    part_number,
-    description,
-    quantity_on_hand: Number(formData.get("quantity_on_hand") ?? 0),
-    reorder_threshold: Number(formData.get("reorder_threshold") ?? 0),
-    size_weight: String(formData.get("size_weight") ?? "") || null,
-    notes: String(formData.get("notes") ?? "") || null,
-  });
+  const id = createPart({ part_number, description });
   revalidatePath("/parts");
   redirect(`/parts/${id}`);
 }
@@ -24,10 +17,6 @@ export async function createPartAction(formData: FormData) {
 export async function updatePartAction(id: number, formData: FormData) {
   updatePart(id, {
     description: String(formData.get("description") ?? "").trim(),
-    quantity_on_hand: Number(formData.get("quantity_on_hand") ?? 0),
-    reorder_threshold: Number(formData.get("reorder_threshold") ?? 0),
-    size_weight: String(formData.get("size_weight") ?? "") || null,
-    notes: String(formData.get("notes") ?? "") || null,
   });
   revalidatePath(`/parts/${id}`);
   revalidatePath("/parts");
