@@ -4,7 +4,13 @@ import { getLocation, listNearestServiceCompanies, listServiceRequests } from "@
 import { LOCATION_STATUSES } from "@/lib/types";
 import Badge from "@/components/Badge";
 import BackLink from "@/components/BackLink";
-import { updateLocationAction } from "../actions";
+import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
+import { isAdmin } from "@/lib/session";
+import {
+  deleteLocationAction,
+  updateLocationAction,
+  wipeServiceHistoryForLocationAction,
+} from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +26,9 @@ export default async function LocationDetailPage({
   const requests = listServiceRequests({ locationId: location.id });
   const nearestCompanies = listNearestServiceCompanies(location.id, 3);
   const updateWithId = updateLocationAction.bind(null, location.id);
+  const deleteWithId = deleteLocationAction.bind(null, location.id);
+  const wipeHistoryWithId = wipeServiceHistoryForLocationAction.bind(null, location.id);
+  const admin = await isAdmin();
 
   return (
     <div className="space-y-6">
@@ -29,12 +38,31 @@ export default async function LocationDetailPage({
           <p className="text-sm text-stone-500 mt-1">Store #{location.store_number}</p>
           <h1 className="text-2xl font-semibold text-charcoal">{location.name}</h1>
         </div>
-        <Link
-          href={`/service-requests/new?locationId=${location.id}`}
-          className="rounded-md bg-hotsauce px-3 py-2 text-sm font-medium text-white hover:bg-hickory"
-        >
-          New Service Request
-        </Link>
+        <div className="flex items-start gap-2">
+          <Link
+            href={`/service-requests/new?locationId=${location.id}`}
+            className="rounded-md bg-hotsauce px-3 py-2 text-sm font-medium text-white hover:bg-hickory"
+          >
+            New Service Request
+          </Link>
+          {admin && (
+            <>
+              {requests.length > 0 && (
+                <ConfirmSubmitButton
+                  action={wipeHistoryWithId}
+                  label="Wipe Service History"
+                  variant="neutral"
+                  confirmMessage={`Delete all ${requests.length} service request(s) logged for #${location.store_number} ${location.name}? The location and its equipment on file stay intact — only the request history is removed. This cannot be undone.`}
+                />
+              )}
+              <ConfirmSubmitButton
+                action={deleteWithId}
+                label="Delete Location"
+                confirmMessage={`Permanently delete #${location.store_number} ${location.name}? This also removes all ${requests.length} service request(s) and equipment on file for it. This cannot be undone.`}
+              />
+            </>
+          )}
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">

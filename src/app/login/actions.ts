@@ -2,17 +2,18 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { checkPassword, createSessionToken, COOKIE_NAME } from "@/lib/auth";
+import { resolveRole, createSessionToken, COOKIE_NAME } from "@/lib/auth";
 
 export async function login(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   const next = String(formData.get("next") ?? "/");
 
-  if (!checkPassword(password)) {
+  const role = resolveRole(password);
+  if (!role) {
     redirect(`/login?error=1&next=${encodeURIComponent(next)}`);
   }
 
-  const { value, expires } = createSessionToken();
+  const { value, expires } = createSessionToken(role);
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, value, {
     httpOnly: true,

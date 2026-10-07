@@ -34,7 +34,7 @@ function BrandMark() {
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -59,14 +59,21 @@ export default function Sidebar() {
   );
 
   const signOutForm = (
-    <form action={logout} className="px-3 py-4 border-t border-white/10">
-      <button
-        type="submit"
-        className="w-full text-left text-sm text-white/60 hover:text-hotsauce transition-colors"
-      >
-        Sign out
-      </button>
-    </form>
+    <div className="px-3 py-4 border-t border-white/10 space-y-2">
+      {isAdmin && (
+        <span className="inline-flex items-center rounded-full bg-hotsauce/20 px-2.5 py-0.5 text-[11px] font-medium text-hotsauce">
+          Admin
+        </span>
+      )}
+      <form action={logout}>
+        <button
+          type="submit"
+          className="w-full text-left text-sm text-white/60 hover:text-hotsauce transition-colors"
+        >
+          Sign out
+        </button>
+      </form>
+    </div>
   );
 
   return (

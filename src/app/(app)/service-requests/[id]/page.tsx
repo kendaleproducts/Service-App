@@ -10,8 +10,10 @@ import {
 import { SERVICE_REQUEST_PRIORITIES, SERVICE_REQUEST_STATUSES } from "@/lib/types";
 import Badge from "@/components/Badge";
 import BackLink from "@/components/BackLink";
+import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
+import { isAdmin } from "@/lib/session";
 import PartsField from "../PartsField";
-import { addNoteAction, updateServiceRequestAction } from "../actions";
+import { addNoteAction, deleteServiceRequestAction, updateServiceRequestAction } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +37,8 @@ export default async function ServiceRequestDetailPage({
   const requestParts = listPartsForRequest(request.id);
   const updateWithId = updateServiceRequestAction.bind(null, request.id);
   const addNoteWithId = addNoteAction.bind(null, request.id);
+  const deleteWithId = deleteServiceRequestAction.bind(null, request.id);
+  const admin = await isAdmin();
 
   return (
     <div className="space-y-6">
@@ -61,6 +65,13 @@ export default async function ServiceRequestDetailPage({
           >
             Print Ticket
           </Link>
+          {admin && (
+            <ConfirmSubmitButton
+              action={deleteWithId}
+              label="Delete Request"
+              confirmMessage={`Permanently delete this service request for #${request.store_number} ${request.location_name}? This also removes its notes and parts list, and its ticket can no longer be printed. This cannot be undone.`}
+            />
+          )}
         </div>
       </div>
 

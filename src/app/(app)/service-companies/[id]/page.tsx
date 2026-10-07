@@ -3,8 +3,14 @@ import { notFound } from "next/navigation";
 import { getServiceCompany, listServiceRequests } from "@/lib/data";
 import Badge from "@/components/Badge";
 import BackLink from "@/components/BackLink";
+import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
+import { isAdmin } from "@/lib/session";
 import CompanyForm from "../CompanyForm";
-import { updateServiceCompanyAction } from "../actions";
+import {
+  deleteServiceCompanyAction,
+  unassignCompanyFromHistoryAction,
+  updateServiceCompanyAction,
+} from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -19,18 +25,40 @@ export default async function ServiceCompanyDetailPage({
 
   const requests = listServiceRequests({ companyId: company.id });
   const updateWithId = updateServiceCompanyAction.bind(null, company.id);
+  const deleteWithId = deleteServiceCompanyAction.bind(null, company.id);
+  const unassignWithId = unassignCompanyFromHistoryAction.bind(null, company.id);
+  const admin = await isAdmin();
 
   return (
     <div className="space-y-6">
-      <div>
-        <BackLink fallbackHref="/service-companies" label="Back to service companies" />
-        <h1 className="text-2xl font-semibold text-charcoal mt-1">{company.name}</h1>
-        {(company.city || company.province) && (
-          <p className="text-sm text-stone-500">
-            {company.city}
-            {company.city && company.province ? ", " : ""}
-            {company.province}
-          </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <BackLink fallbackHref="/service-companies" label="Back to service companies" />
+          <h1 className="text-2xl font-semibold text-charcoal mt-1">{company.name}</h1>
+          {(company.city || company.province) && (
+            <p className="text-sm text-stone-500">
+              {company.city}
+              {company.city && company.province ? ", " : ""}
+              {company.province}
+            </p>
+          )}
+        </div>
+        {admin && (
+          <div className="flex items-start gap-2">
+            {requests.length > 0 && (
+              <ConfirmSubmitButton
+                action={unassignWithId}
+                label="Unassign from History"
+                variant="neutral"
+                confirmMessage={`Unassign ${company.name} from all ${requests.length} service request(s) it's attached to? The requests themselves stay on file — only the vendor link is cleared. This cannot be undone.`}
+              />
+            )}
+            <ConfirmSubmitButton
+              action={deleteWithId}
+              label="Delete Company"
+              confirmMessage={`Permanently delete ${company.name}? Any service requests assigned to it will be unassigned (kept on file) rather than deleted. This cannot be undone.`}
+            />
+          </div>
         )}
       </div>
 

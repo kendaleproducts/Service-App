@@ -9,7 +9,7 @@ Currently configured for **Mary Brown's** (hundreds of locations). Built to be a
 - **Next.js** (App Router, TypeScript) — pages + server actions, no separate API layer needed
 - **SQLite** via `better-sqlite3` — single file database, zero external services to run
 - **Tailwind CSS** — utility classes only, no component library
-- Single shared admin password for login (small trusted internal team)
+- Shared passwords for login (small trusted internal team), two tiers — day-to-day staff and elevated admin
 
 No build step beyond `next build`, no external database server, no queue/cache/etc. The whole app is one Node process plus one SQLite file.
 
@@ -38,13 +38,27 @@ Both are safe to re-run — each only inserts if its data doesn't already exist.
 
 | Variable | Purpose |
 |---|---|
-| `ADMIN_PASSWORD` | The single shared password staff use to sign in |
+| `ADMIN_PASSWORD` | The shared password day-to-day staff use to sign in |
+| `SUPER_ADMIN_PASSWORD` | Optional. A second, different password that signs in with elevated **admin** access — see "Admin access" below. Without it set, nobody gets admin access. |
 | `SESSION_SECRET` | Random string used to sign session cookies. Generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | `DATA_DIR` | Optional. Where the SQLite file is stored. Defaults to `./data`. Set this to point at a mounted persistent volume when deploying (see below). |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Optional. Enables the map on the Locations page. See "Map setup" below. |
 | `GOOGLE_MAPS_API_KEY` | Optional. Used server-side to geocode location addresses into map coordinates. See "Map setup" below. |
 
 `ADMIN_PASSWORD` and `SESSION_SECRET` are required — the app will throw on first use if either is missing. The two map keys are optional — without them, the Locations page just shows a small "map unavailable" notice instead of a map.
+
+## Admin access
+
+There's one login screen — whichever password is entered decides the session's access level:
+
+- `ADMIN_PASSWORD` signs in as **staff**: everything day-to-day (create/update service requests, locations, companies, parts; add notes; print tickets).
+- `SUPER_ADMIN_PASSWORD` signs in as **admin**: everything staff can do, plus the destructive, rarely-used operations that aren't exposed to a staff session at all:
+  - Delete a service request (there's no separate ticket record to delete — the ticket is only ever rendered live from the request, so deleting the request removes its printable ticket too)
+  - Delete a service company (any requests it was assigned to are unassigned, not deleted, so their history stays on file)
+  - Delete a location, or wipe just its service request history while keeping the location and its equipment on file
+  - Unassign a service company from every request it's attached to, without deleting those requests
+
+An admin session shows a small "Admin" badge in the sidebar. These buttons only appear for admin sessions; a staff session never sees them. Every one of these asks for confirmation before running, and none of them can be undone.
 
 ## Data model
 
@@ -92,7 +106,8 @@ This runs as a single long-lived Node process, not a serverless function — it 
 2. At [railway.app](https://railway.app), **New Project → Deploy from GitHub repo**, pick this repo/branch.
 3. Add a **Volume**, mount it at `/data`.
 4. Under the service's **Variables**, add:
-   - `ADMIN_PASSWORD` — your chosen password
+   - `ADMIN_PASSWORD` — your chosen staff password
+   - `SUPER_ADMIN_PASSWORD` — optional, a different password for admin access (see "Admin access" above)
    - `SESSION_SECRET` — a random string (generate with the command above)
    - `DATA_DIR` = `/data`
 5. Railway auto-detects Next.js, runs `npm install && npm run build`, then `npm run start`, and gives you a public `https://*.up.railway.app` URL.

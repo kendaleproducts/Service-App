@@ -2,7 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createServiceCompany, updateServiceCompany } from "@/lib/data";
+import {
+  createServiceCompany,
+  deleteServiceCompany,
+  unassignCompanyFromHistory,
+  updateServiceCompany,
+} from "@/lib/data";
+import { requireAdmin } from "@/lib/session";
 
 function fields(formData: FormData) {
   return {
@@ -31,4 +37,18 @@ export async function updateServiceCompanyAction(id: number, formData: FormData)
   updateServiceCompany(id, fields(formData));
   revalidatePath(`/service-companies/${id}`);
   revalidatePath("/service-companies");
+}
+
+export async function deleteServiceCompanyAction(id: number) {
+  await requireAdmin();
+  deleteServiceCompany(id);
+  revalidatePath("/service-companies");
+  redirect("/service-companies");
+}
+
+export async function unassignCompanyFromHistoryAction(id: number) {
+  await requireAdmin();
+  unassignCompanyFromHistory(id);
+  revalidatePath(`/service-companies/${id}`);
+  revalidatePath("/service-requests");
 }

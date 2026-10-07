@@ -2,7 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createLocation, getOrCreateCustomer, updateLocation } from "@/lib/data";
+import {
+  createLocation,
+  deleteLocation,
+  getOrCreateCustomer,
+  updateLocation,
+  wipeServiceHistoryForLocation,
+} from "@/lib/data";
+import { requireAdmin } from "@/lib/session";
 
 export async function updateLocationAction(id: number, formData: FormData) {
   updateLocation(id, {
@@ -43,4 +50,18 @@ export async function createLocationAction(formData: FormData) {
   });
   revalidatePath("/locations");
   redirect(`/locations/${id}`);
+}
+
+export async function deleteLocationAction(id: number) {
+  await requireAdmin();
+  deleteLocation(id);
+  revalidatePath("/locations");
+  redirect("/locations");
+}
+
+export async function wipeServiceHistoryForLocationAction(id: number) {
+  await requireAdmin();
+  wipeServiceHistoryForLocation(id);
+  revalidatePath(`/locations/${id}`);
+  revalidatePath("/service-requests");
 }

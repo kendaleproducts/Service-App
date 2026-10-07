@@ -210,6 +210,33 @@ export function upsertLocationByStoreNumber(input: {
   return "inserted";
 }
 
+/** Deletes every service request (and its notes/parts) logged against a location, keeping the location and its equipment on file. Admin-only. */
+export const wipeServiceHistoryForLocation = db.transaction((locationId: number) => {
+  const requestIds = db
+    .prepare("SELECT id FROM service_requests WHERE location_id = ?")
+    .all(locationId) as { id: number }[];
+  const deleteParts = db.prepare("DELETE FROM service_request_parts WHERE service_request_id = ?");
+  const deleteNotes = db.prepare("DELETE FROM service_request_notes WHERE service_request_id = ?");
+  for (const { id } of requestIds) {
+    deleteParts.run(id);
+    deleteNotes.run(id);
+  }
+  db.prepare(
+    "UPDATE part_shipments SET service_request_id = NULL WHERE service_request_id IN (SELECT id FROM service_requests WHERE location_id = ?)"
+  ).run(locationId);
+  db.prepare("DELETE FROM service_requests WHERE location_id = ?").run(locationId);
+});
+
+/** Permanently removes a location, cascading its service requests (and their notes/parts) and equipment on file. Admin-only. */
+export const deleteLocation = db.transaction((locationId: number) => {
+  wipeServiceHistoryForLocation(locationId);
+  db.prepare(
+    "UPDATE part_shipments SET location_id = NULL WHERE location_id = ?"
+  ).run(locationId);
+  db.prepare("DELETE FROM equipment WHERE location_id = ?").run(locationId);
+  db.prepare("DELETE FROM locations WHERE id = ?").run(locationId);
+});
+
 // ---------- Service companies ----------
 
 export function listServiceCompanies(): ServiceCompany[] {
@@ -232,6 +259,22 @@ export const deleteAllServiceCompanies = db.transaction(() => {
     "UPDATE part_shipments SET service_company_id = NULL WHERE service_company_id IS NOT NULL"
   ).run();
   db.prepare("DELETE FROM service_companies").run();
+});
+
+/** Clears a single vendor's assignment from its past service requests, keeping the requests themselves on file. Admin-only. */
+export const unassignCompanyFromHistory = db.transaction((companyId: number) => {
+  db.prepare(
+    "UPDATE service_requests SET service_company_id = NULL WHERE service_company_id = ?"
+  ).run(companyId);
+  db.prepare(
+    "UPDATE part_shipments SET service_company_id = NULL WHERE service_company_id = ?"
+  ).run(companyId);
+});
+
+/** Permanently removes a service company, unassigning it from any past requests/shipments first. Admin-only. */
+export const deleteServiceCompany = db.transaction((companyId: number) => {
+  unassignCompanyFromHistory(companyId);
+  db.prepare("DELETE FROM service_companies WHERE id = ?").run(companyId);
 });
 
 export function createServiceCompany(input: {
@@ -683,6 +726,20 @@ export function listServiceRequestNotes(serviceRequestId: number): ServiceReques
     )
     .all(serviceRequestId) as ServiceRequestNote[];
 }
+
+/** Permanently removes a service request and its notes/parts. There's no separate ticket record to delete — the ticket is only ever rendered live from the request, so deleting the request removes its ticket too. Admin-only. */
+export const deleteServiceRequest = db.transaction((serviceRequestId: number) => {
+  db.prepare("DELETE FROM service_request_parts WHERE service_request_id = ?").run(
+    serviceRequestId
+  );
+  db.prepare("DELETE FROM service_request_notes WHERE service_request_id = ?").run(
+    serviceRequestId
+  );
+  db.prepare("UPDATE part_shipments SET service_request_id = NULL WHERE service_request_id = ?").run(
+    serviceRequestId
+  );
+  db.prepare("DELETE FROM service_requests WHERE id = ?").run(serviceRequestId);
+});
 
 // ---------- Dashboard ----------
 

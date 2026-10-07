@@ -5,12 +5,14 @@ import { redirect } from "next/navigation";
 import {
   addServiceRequestNote,
   createServiceRequest,
+  deleteServiceRequest,
   getEquipment,
   getOrCreateEquipment,
   listEquipmentForLocation,
   setPartsForRequest,
   updateServiceRequest,
 } from "@/lib/data";
+import { requireAdmin } from "@/lib/session";
 
 export async function getLocationEquipmentAction(locationId: number) {
   return listEquipmentForLocation(locationId);
@@ -104,4 +106,11 @@ export async function addNoteAction(id: number, formData: FormData) {
   if (!note) return;
   addServiceRequestNote(id, note);
   revalidatePath(`/service-requests/${id}`);
+}
+
+export async function deleteServiceRequestAction(id: number) {
+  await requireAdmin();
+  deleteServiceRequest(id);
+  revalidatePath("/service-requests");
+  redirect("/service-requests");
 }
