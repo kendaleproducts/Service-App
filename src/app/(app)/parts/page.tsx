@@ -23,7 +23,7 @@ export default async function PartsPage({
           href="/parts/new"
           className="rounded-md bg-hotsauce px-3 py-2 text-sm font-medium text-white hover:bg-hickory"
         >
-          Add Part
+          + Add Part
         </Link>
       </div>
 

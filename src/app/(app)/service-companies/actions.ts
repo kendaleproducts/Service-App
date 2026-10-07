@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   createServiceCompany,
+  deleteAllServiceCompanies,
   deleteServiceCompany,
   unassignCompanyFromHistory,
   updateServiceCompany,
@@ -50,5 +51,12 @@ export async function unassignCompanyFromHistoryAction(id: number) {
   await requireAdmin();
   unassignCompanyFromHistory(id);
   revalidatePath(`/service-companies/${id}`);
+  revalidatePath("/service-requests");
+}
+
+export async function clearAllServiceCompaniesAction() {
+  await requireAdmin();
+  deleteAllServiceCompanies();
+  revalidatePath("/service-companies");
   revalidatePath("/service-requests");
 }

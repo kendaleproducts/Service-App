@@ -43,7 +43,7 @@ export default async function LocationDetailPage({
             href={`/service-requests/new?locationId=${location.id}`}
             className="rounded-md bg-hotsauce px-3 py-2 text-sm font-medium text-white hover:bg-hickory"
           >
-            New Service Request
+            + New Service Request
           </Link>
           {admin && (
             <>

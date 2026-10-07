@@ -1,7 +1,9 @@
 import BackLink from "@/components/BackLink";
+import { isAdmin } from "@/lib/session";
 import ImportForm from "./ImportForm";
 
-export default function ServiceCompaniesImportPage() {
+export default async function ServiceCompaniesImportPage() {
+  const admin = await isAdmin();
   return (
     <div className="max-w-2xl space-y-6">
       <div>
@@ -11,7 +13,7 @@ export default function ServiceCompaniesImportPage() {
           Upload your list of contracted service providers to add or update them.
         </p>
       </div>
-      <ImportForm />
+      <ImportForm allowReplace={admin} />
     </div>
   );
 }

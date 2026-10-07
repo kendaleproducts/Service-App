@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getDashboardStats } from "@/lib/data";
 import Badge from "@/components/Badge";
 import ClickableRow from "@/components/ClickableRow";
-import LoadDemoDataButton from "./LoadDemoDataButton";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +52,6 @@ export default async function DashboardPage() {
           >
             + New Service Request
           </Link>
-          <LoadDemoDataButton />
         </div>
       </div>
 

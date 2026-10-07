@@ -23,17 +23,6 @@ npm run dev
 
 Open http://localhost:3000 and sign in with the password from `.env.local`.
 
-### Demo data
-
-Both seed scripts require real locations to already exist — **import the real spreadsheet first** (Locations → Import from Excel), then layer demo data on top. Neither script ever fabricates a location; only the store data you actually import is used. Service companies, parts, and service requests they create are made up for demo purposes (you don't have real contracted vendors on file yet).
-
-```bash
-npm run seed:demo     # general demo: a few vendors, misc equipment parts, requests across every status/priority
-npm run seed:fryers   # Mary Brown's-specific: electric pressure fryer parts and failure scenarios
-```
-
-Both are safe to re-run — each only inserts if its data doesn't already exist. To start over completely, stop the app, delete the `data/` folder, re-import the spreadsheet, then re-run whichever seed script you want.
-
 ### Environment variables
 
 | Variable | Purpose |
@@ -54,9 +43,10 @@ There's one login screen — whichever password is entered decides the session's
 - `USER_PASSWORD` signs in as **user**: everything day-to-day (create/update service requests, locations, companies, parts; add notes; print tickets).
 - `ADMIN_PASSWORD` signs in as **admin**: everything a user can do, plus the destructive, rarely-used operations that aren't exposed to a user session at all:
   - Delete a service request (there's no separate ticket record to delete — the ticket is only ever rendered live from the request, so deleting the request removes its printable ticket too)
-  - Delete a service company (any requests it was assigned to are unassigned, not deleted, so their history stays on file)
+  - Delete a service company, or clear the entire service companies list at once (any requests they were assigned to are unassigned, not deleted, so their history stays on file)
   - Delete a location, or wipe just its service request history while keeping the location and its equipment on file
   - Unassign a service company from every request it's attached to, without deleting those requests
+  - Replace the entire service companies list via import (the "Replace all" checkbox on Import from Excel) — a merge/update import stays available to everyone
 
 An admin session shows a small "Admin" badge in the sidebar. These buttons only appear for admin sessions; a user session never sees them. Every one of these asks for confirmation before running, and none of them can be undone.
 

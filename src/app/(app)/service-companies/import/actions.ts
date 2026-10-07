@@ -5,6 +5,7 @@ import {
   importServiceCompaniesFromWorkbook,
   type ImportResult,
 } from "@/lib/importServiceCompanies";
+import { isAdmin } from "@/lib/session";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -22,6 +23,14 @@ export async function runServiceCompanyImport(
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const mode = formData.get("replace") === "on" ? "replace" : "merge";
+  if (mode === "replace" && !(await isAdmin())) {
+    return {
+      inserted: 0,
+      updated: 0,
+      skipped: 0,
+      errors: ["Replacing all service companies requires admin access."],
+    };
+  }
 
   try {
     const result = importServiceCompaniesFromWorkbook(buffer, mode);

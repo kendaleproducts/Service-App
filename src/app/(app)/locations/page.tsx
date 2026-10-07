@@ -48,7 +48,7 @@ export default async function LocationsPage({
             href="/locations/new"
             className="rounded-md bg-hotsauce px-3 py-2 text-sm font-medium text-white hover:bg-hickory"
           >
-            Add Location
+            + Add Location
           </Link>
         </div>
       </div>
