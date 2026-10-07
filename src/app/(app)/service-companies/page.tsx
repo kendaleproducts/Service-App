@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { listServiceCompanies } from "@/lib/data";
+import { listServiceCompanies, listServiceCompaniesMissingCoordinates } from "@/lib/data";
 import ClickableRow from "@/components/ClickableRow";
 import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
 import { isAdmin } from "@/lib/session";
 import { clearAllServiceCompaniesAction } from "./actions";
+import GeocodeButton from "./GeocodeButton";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export default async function ServiceCompaniesPage({
 }) {
   const params = await searchParams;
   const allCompanies = listServiceCompanies();
+  const missingCoordinates = listServiceCompaniesMissingCoordinates();
   const admin = await isAdmin();
   const q = params.q?.trim().toLowerCase();
   const companies = q
@@ -56,6 +58,8 @@ export default async function ServiceCompaniesPage({
           )}
         </div>
       </div>
+
+      <GeocodeButton missingCount={missingCoordinates.length} />
 
       <form className="flex flex-wrap gap-3 bg-white border border-stone-200 rounded-lg p-4">
         <input

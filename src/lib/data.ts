@@ -72,6 +72,17 @@ export function listGeocodedLocations(): Location[] {
     .all() as Location[];
 }
 
+export function listServiceCompaniesMissingCoordinates(): ServiceCompany[] {
+  return db
+    .prepare(
+      `SELECT * FROM service_companies
+       WHERE latitude IS NULL
+         AND ((address IS NOT NULL AND address != '') OR (city IS NOT NULL AND city != ''))
+       ORDER BY name`
+    )
+    .all() as ServiceCompany[];
+}
+
 export function listGeocodedServiceCompanies(): ServiceCompany[] {
   return db
     .prepare(

@@ -1,4 +1,9 @@
-import { listLocationsMissingCoordinates, updateLocation } from "./data";
+import {
+  listLocationsMissingCoordinates,
+  listServiceCompaniesMissingCoordinates,
+  updateLocation,
+  updateServiceCompany,
+} from "./data";
 
 export interface GeocodeResult {
   lat: number;
@@ -92,6 +97,72 @@ export async function geocodeAllMissingLocations(): Promise<GeocodeBatchResult> 
     geocoded,
     failed,
     message: `Geocoded ${geocoded} location(s)${failed > 0 ? `, ${failed} failed` : ""}.`,
+    errors: errors.slice(0, 15),
+  };
+}
+
+export async function geocodeAllMissingServiceCompanies(): Promise<GeocodeBatchResult> {
+  if (!process.env.GOOGLE_MAPS_API_KEY) {
+    return {
+      ok: false,
+      geocoded: 0,
+      failed: 0,
+      message:
+        "GOOGLE_MAPS_API_KEY is not set. Add it to your environment variables and try again.",
+      errors: [],
+    };
+  }
+
+  const companies = listServiceCompaniesMissingCoordinates();
+  if (companies.length === 0) {
+    return {
+      ok: true,
+      geocoded: 0,
+      failed: 0,
+      message: "All service companies already have coordinates.",
+      errors: [],
+    };
+  }
+
+  let geocoded = 0;
+  let failed = 0;
+  const errors: string[] = [];
+
+  for (let i = 0; i < companies.length; i += BATCH_SIZE) {
+    const batch = companies.slice(i, i + BATCH_SIZE);
+    await Promise.all(
+      batch.map(async (company) => {
+        const fullAddress = [
+          company.address,
+          company.city,
+          company.province,
+          company.postal_code,
+          company.country ?? "Canada",
+        ]
+          .filter(Boolean)
+          .join(", ");
+        try {
+          const result = await geocodeAddress(fullAddress);
+          if (result) {
+            updateServiceCompany(company.id, { latitude: result.lat, longitude: result.lng });
+            geocoded += 1;
+          } else {
+            failed += 1;
+            errors.push(`${company.name}: no match found`);
+          }
+        } catch (err) {
+          failed += 1;
+          errors.push(`${company.name}: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      })
+    );
+  }
+
+  return {
+    ok: true,
+    geocoded,
+    failed,
+    message: `Geocoded ${geocoded} service company(s)${failed > 0 ? `, ${failed} failed` : ""}.`,
     errors: errors.slice(0, 15),
   };
 }
