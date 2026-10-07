@@ -3,7 +3,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 const COOKIE_NAME = "session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14; // 14 days
 
-export type SessionRole = "staff" | "admin";
+export type SessionRole = "user" | "admin";
 
 function getSecret(): string {
   const secret = process.env.SESSION_SECRET;
@@ -29,7 +29,7 @@ export function verifySessionToken(token: string | undefined): SessionRole | nul
   if (!token) return null;
   const [expiresAtStr, role, hmac] = token.split(".");
   if (!expiresAtStr || !role || !hmac) return null;
-  if (role !== "staff" && role !== "admin") return null;
+  if (role !== "user" && role !== "admin") return null;
   const expiresAt = Number(expiresAtStr);
   if (!Number.isFinite(expiresAt) || expiresAt < Date.now()) return null;
 
@@ -55,19 +55,19 @@ function timingSafeMatch(candidate: string, expected: string): boolean {
 
 /**
  * Resolves a login password to a role. Checked against two separate
- * passwords: ADMIN_PASSWORD (day-to-day staff access, required) and
- * SUPER_ADMIN_PASSWORD (elevated access for destructive actions, optional —
+ * passwords: USER_PASSWORD (day-to-day access, required) and
+ * ADMIN_PASSWORD (elevated access for destructive actions, optional —
  * admin tier simply doesn't exist until it's set).
  */
 export function resolveRole(candidate: string): SessionRole | null {
-  const staffPassword = process.env.ADMIN_PASSWORD;
-  if (!staffPassword) {
-    throw new Error("ADMIN_PASSWORD environment variable is not set");
+  const userPassword = process.env.USER_PASSWORD;
+  if (!userPassword) {
+    throw new Error("USER_PASSWORD environment variable is not set");
   }
-  const adminPassword = process.env.SUPER_ADMIN_PASSWORD;
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (adminPassword && timingSafeMatch(candidate, adminPassword)) return "admin";
-  if (timingSafeMatch(candidate, staffPassword)) return "staff";
+  if (timingSafeMatch(candidate, userPassword)) return "user";
   return null;
 }
 
