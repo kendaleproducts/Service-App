@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { haversineKm } from "@/lib/geo";
 import { SERVICE_REQUEST_PRIORITIES } from "@/lib/types";
 import type { Equipment, Part } from "@/lib/types";
+import LocationPickerMap from "@/components/LocationPickerMap";
 import PartsField from "../PartsField";
 
 interface LocationOption {
@@ -94,6 +95,17 @@ export default function NewServiceRequestForm({
     setShowNewEquipment(false);
   }
 
+  function selectLocation(id: string) {
+    setLocationId(id);
+    setCompanyId("");
+    setShowOtherPicker(false);
+    setEquipmentId("");
+    setShowNewEquipment(false);
+    setNewSerial("");
+    setNewDescription("");
+    setEquipmentList([]);
+  }
+
   return (
     <form action={action} className="bg-white border border-stone-200 rounded-lg p-5 space-y-4">
       <div>
@@ -102,16 +114,7 @@ export default function NewServiceRequestForm({
           name="location_id"
           required
           value={locationId}
-          onChange={(e) => {
-            setLocationId(e.target.value);
-            setCompanyId("");
-            setShowOtherPicker(false);
-            setEquipmentId("");
-            setShowNewEquipment(false);
-            setNewSerial("");
-            setNewDescription("");
-            setEquipmentList([]);
-          }}
+          onChange={(e) => selectLocation(e.target.value)}
           className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
         >
           <option value="" disabled>
@@ -124,6 +127,12 @@ export default function NewServiceRequestForm({
           ))}
         </select>
       </div>
+
+      <LocationPickerMap
+        locations={locations}
+        selectedLocationId={locationId}
+        onSelect={selectLocation}
+      />
 
       {locationId && (
         <div>
