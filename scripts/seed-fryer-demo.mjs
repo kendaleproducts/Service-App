@@ -192,15 +192,9 @@ scenarios.forEach((scenario, i) => {
   }
 
   if (scenario.ship) {
-    const shipmentId = db
-      .prepare(
-        `INSERT INTO part_shipments (service_request_id, location_id, carrier, tracking_number, status, shipped_at)
-         VALUES (?, ?, 'Purolator', 'PUR' || abs(random() % 900000000 + 100000000), 'Shipped', datetime('now'))`
-      )
-      .run(reqId, location.id).lastInsertRowid;
     db.prepare(
-      "INSERT INTO part_shipment_items (part_shipment_id, part_id, quantity) VALUES (?, ?, 1)"
-    ).run(shipmentId, partIds[scenario.ship]);
+      "INSERT INTO service_request_parts (service_request_id, part_id, quantity) VALUES (?, ?, 1)"
+    ).run(reqId, partIds[scenario.ship]);
   }
 
   console.log(`Created request at #${location.store_number} ${location.name} (${location.province}): ${scenario.issue_description.slice(0, 60)}...`);

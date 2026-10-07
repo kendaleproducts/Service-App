@@ -11,8 +11,7 @@ const NAV_LINKS = [
   { href: "/service-requests", label: "Service Requests" },
   { href: "/locations", label: "Locations" },
   { href: "/service-companies", label: "Service Companies" },
-  { href: "/parts", label: "Parts Inventory" },
-  { href: "/shipments", label: "Shipments" },
+  { href: "/parts", label: "Parts" },
   { href: "/reports", label: "Reports" },
 ];
 

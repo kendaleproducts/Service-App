@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { haversineKm } from "@/lib/geo";
 import { SERVICE_REQUEST_PRIORITIES } from "@/lib/types";
-import type { Equipment } from "@/lib/types";
+import type { Equipment, Part } from "@/lib/types";
+import PartsField from "../PartsField";
 
 interface LocationOption {
   id: number;
@@ -30,12 +31,14 @@ export default function NewServiceRequestForm({
   getEquipmentForLocation,
   locations,
   companies,
+  parts,
   preselectedLocationId,
 }: {
   action: (formData: FormData) => Promise<void>;
   getEquipmentForLocation: (locationId: number) => Promise<Equipment[]>;
   locations: LocationOption[];
   companies: CompanyOption[];
+  parts: Part[];
   preselectedLocationId?: number;
 }) {
   const [locationId, setLocationId] = useState(
@@ -303,6 +306,8 @@ export default function NewServiceRequestForm({
           <input type="hidden" name="service_company_id" value={companyId} />
         </div>
       )}
+
+      <PartsField parts={parts} />
 
       <div>
         <label className="block text-xs font-medium text-stone-500 mb-1">

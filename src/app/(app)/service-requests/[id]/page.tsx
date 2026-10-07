@@ -2,13 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   getServiceRequest,
+  listParts,
+  listPartsForRequest,
   listServiceCompanies,
   listServiceRequestNotes,
-  listShipmentsForRequest,
 } from "@/lib/data";
 import { SERVICE_REQUEST_PRIORITIES, SERVICE_REQUEST_STATUSES } from "@/lib/types";
 import Badge from "@/components/Badge";
 import BackLink from "@/components/BackLink";
+import PartsField from "../PartsField";
 import { addNoteAction, updateServiceRequestAction } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +31,8 @@ export default async function ServiceRequestDetailPage({
 
   const companies = listServiceCompanies();
   const notes = listServiceRequestNotes(request.id);
-  const shipments = listShipmentsForRequest(request.id);
+  const parts = listParts();
+  const requestParts = listPartsForRequest(request.id);
   const updateWithId = updateServiceRequestAction.bind(null, request.id);
   const addNoteWithId = addNoteAction.bind(null, request.id);
 
@@ -121,6 +124,9 @@ export default async function ServiceRequestDetailPage({
               />
             </div>
             <div className="col-span-2">
+              <PartsField parts={parts} initialItems={requestParts} />
+            </div>
+            <div className="col-span-2">
               <label className="block text-xs font-medium text-stone-500 mb-1">
                 Issue Description
               </label>
@@ -186,32 +192,6 @@ export default async function ServiceRequestDetailPage({
         </form>
 
         <div className="space-y-6">
-          <div className="bg-white border border-stone-200 rounded-lg">
-            <div className="px-4 py-3 border-b border-stone-200 flex items-center justify-between">
-              <h2 className="font-medium text-charcoal">Parts Shipments</h2>
-              <Link
-                href={`/shipments/new?serviceRequestId=${request.id}`}
-                className="text-sm text-stone-500 hover:text-hotsauce"
-              >
-                + Ship parts
-              </Link>
-            </div>
-            {shipments.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-stone-500">No parts shipped for this request yet.</p>
-            ) : (
-              <ul className="divide-y divide-stone-100">
-                {shipments.map((s) => (
-                  <li key={s.id} className="px-4 py-3 flex items-center justify-between">
-                    <Link href={`/shipments/${s.id}`} className="text-sm font-medium text-charcoal hover:underline">
-                      Shipment #{s.id} {s.tracking_number ? `· ${s.tracking_number}` : ""}
-                    </Link>
-                    <Badge label={s.status} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
           <div className="bg-white border border-stone-200 rounded-lg">
             <div className="px-4 py-3 border-b border-stone-200">
               <h2 className="font-medium text-charcoal">Timeline / Notes</h2>

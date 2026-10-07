@@ -1,6 +1,6 @@
 # Service Tracker
 
-A lightweight, web-based service tracking system for managing cooking equipment service calls, parts shipments, and contracted service companies — built for a single dispatch/parts-stocking location (Fort Erie, ON) supporting a customer's locations across Canada.
+A lightweight, web-based service tracking system for managing cooking equipment service calls and contracted service companies — built for a single dispatch location (Fort Erie, ON) supporting a customer's locations across Canada. The app's core output is a one-page printable **Service Ticket** for each request, handed off for processing, shipping, and billing outside the app.
 
 Currently configured for **Mary Brown's** (hundreds of locations). Built to be a launch pad for onboarding additional customers later — the data model already supports multiple customers, even though the UI currently focuses on one.
 
@@ -51,9 +51,9 @@ Both are safe to re-run — each only inserts if its data doesn't already exist.
 - **Customers** — currently just Mary Brown's; more can be added later.
 - **Locations** — one per store, belongs to a customer. Imported from the head office spreadsheet or added manually.
 - **Service Companies** — contracted vendors who do the on-site repair work.
-- **Parts** — inventory stocked at Fort Erie, with a reorder threshold that flags low stock.
-- **Service Requests** — the core ticket: a location, an issue, a priority/status, an assigned service company, and a free-text timeline of notes.
-- **Part Shipments** — parts shipped from Fort Erie to a location or service company, optionally linked to a service request. Creating a shipment automatically decrements part inventory.
+- **Parts** — a simple catalog (part number + description). No quantity/inventory tracking in-app; your parts spreadsheet is the source of truth.
+- **Service Requests** — the core record: a location, an issue, a priority/status, an assigned service company, equipment/serial info, parts needed, and a free-text timeline of notes.
+- **Service Tickets** — not a separate record. A one-page printable view generated from a Service Request (`/tickets/[id]`), meant to be printed or saved as a PDF for external processing, shipping, and billing.
 
 ## Importing locations from Excel
 

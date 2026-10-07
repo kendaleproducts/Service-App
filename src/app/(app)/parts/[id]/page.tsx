@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPart, listShipmentsForPart } from "@/lib/data";
+import { getPart, listRequestsForPart } from "@/lib/data";
 import Badge from "@/components/Badge";
 import BackLink from "@/components/BackLink";
 import { updatePartAction } from "../actions";
@@ -16,7 +16,7 @@ export default async function PartDetailPage({
   const part = getPart(Number(id));
   if (!part) notFound();
 
-  const shipments = listShipmentsForPart(part.id);
+  const requests = listRequestsForPart(part.id);
   const updateWithId = updatePartAction.bind(null, part.id);
 
   return (
@@ -48,24 +48,24 @@ export default async function PartDetailPage({
 
         <div className="bg-white border border-stone-200 rounded-lg">
           <div className="px-4 py-3 border-b border-stone-200">
-            <h2 className="font-medium text-charcoal">Shipment History</h2>
+            <h2 className="font-medium text-charcoal">Used on Service Requests</h2>
           </div>
-          {shipments.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-stone-500">This part hasn&apos;t been shipped yet.</p>
+          {requests.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-stone-500">Not used on any service request yet.</p>
           ) : (
             <ul className="divide-y divide-stone-100">
-              {shipments.map((s) => (
-                <li key={s.id} className="px-4 py-3">
+              {requests.map((r) => (
+                <li key={r.id} className="px-4 py-3">
                   <Link
-                    href={`/shipments/${s.id}`}
+                    href={`/service-requests/${r.id}`}
                     className="text-sm font-medium text-charcoal hover:underline"
                   >
-                    Qty {s.quantity} → {s.location_name ?? s.service_company_name ?? "Unknown destination"}
+                    Qty {r.quantity} — #{r.store_number} {r.location_name}
                   </Link>
                   <div className="mt-1 flex items-center gap-2">
-                    <Badge label={s.status} />
+                    <Badge label={r.status} />
                     <span className="text-xs text-stone-500">
-                      {new Date(s.created_at).toLocaleDateString()}
+                      {new Date(r.created_at).toLocaleDateString()}
                     </span>
                   </div>
                 </li>

@@ -97,6 +97,15 @@ CREATE TABLE IF NOT EXISTS service_request_notes (
 );
 CREATE INDEX IF NOT EXISTS idx_notes_request ON service_request_notes(service_request_id);
 
+CREATE TABLE IF NOT EXISTS service_request_parts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  service_request_id INTEGER NOT NULL REFERENCES service_requests(id),
+  part_id INTEGER NOT NULL REFERENCES parts(id),
+  quantity INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_service_request_parts_request ON service_request_parts(service_request_id);
+
 CREATE TABLE IF NOT EXISTS part_shipments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   service_request_id INTEGER REFERENCES service_requests(id),

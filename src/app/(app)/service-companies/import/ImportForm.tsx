@@ -11,7 +11,7 @@ export default function ImportForm() {
       replaceOption={{
         label: "Replace all existing service companies with this file",
         warning:
-          "Deletes every current service company first, then imports this file fresh. Service requests and shipments already linked to a deleted company will show as Unassigned rather than losing their history. This cannot be undone.",
+          "Deletes every current service company first, then imports this file fresh. Service requests already linked to a deleted company will show as Unassigned rather than losing their history. This cannot be undone.",
       }}
     />
   );

@@ -140,15 +140,9 @@ function ensureServiceRequests() {
   insertNote.run(req1, "Called Atlantic Kitchen Repair, technician scheduled for Thursday AM");
   insertNote.run(req1, "Technician confirmed thermostat failure, part ordered from Fort Erie");
 
-  const shipmentId = db
-    .prepare(
-      `INSERT INTO part_shipments (service_request_id, location_id, carrier, tracking_number, status, shipped_at)
-       VALUES (?, ?, 'Canada Post', 'CP123456789CA', 'Shipped', datetime('now'))`
-    )
-    .run(req1, locations[0].id).lastInsertRowid;
   db.prepare(
-    "INSERT INTO part_shipment_items (part_shipment_id, part_id, quantity) VALUES (?, ?, 1)"
-  ).run(shipmentId, fryerThermostat.id);
+    "INSERT INTO service_request_parts (service_request_id, part_id, quantity) VALUES (?, ?, 1)"
+  ).run(req1, fryerThermostat.id);
 
   insertRequest.run({
     location_id: locations[1 % locations.length].id,

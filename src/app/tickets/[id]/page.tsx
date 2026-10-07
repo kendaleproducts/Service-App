@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getServiceRequest, listPartsUsedForRequest, listShipmentsForRequest } from "@/lib/data";
+import { getServiceRequest, listPartsForRequest } from "@/lib/data";
 import BackLink from "@/components/BackLink";
 import FlameMark from "@/components/FlameMark";
 import PrintButton from "@/components/PrintButton";
@@ -24,11 +24,8 @@ export default async function ServiceTicketPage({
   const request = getServiceRequest(Number(id));
   if (!request) notFound();
 
-  const parts = listPartsUsedForRequest(request.id);
+  const parts = listPartsForRequest(request.id);
   const serviceCost = request.cost ?? 0;
-  const trackedShipments = listShipmentsForRequest(request.id).filter(
-    (s) => s.tracking_number && s.tracking_number.trim()
-  );
 
   return (
     <div className="min-h-screen bg-stone-100 py-8 print:bg-white print:py-0">
@@ -134,28 +131,12 @@ export default async function ServiceTicketPage({
             {parts.length === 0 && (
               <tr>
                 <td colSpan={3} className="py-3 text-stone-500">
-                  No parts shipped for this request.
+                  No parts needed for this request.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-
-        {trackedShipments.length > 0 && (
-          <div className="mb-6">
-            <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">
-              Shipment Tracking
-            </p>
-            <ul className="space-y-0.5">
-              {trackedShipments.map((s) => (
-                <li key={s.id}>
-                  {s.carrier ? `${s.carrier} — ` : ""}
-                  {s.tracking_number}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
 
         <div className="flex justify-end">
           <div className="w-64 text-sm">

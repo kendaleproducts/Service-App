@@ -1,4 +1,4 @@
-import { listLocations, listServiceCompanies } from "@/lib/data";
+import { listLocations, listParts, listServiceCompanies } from "@/lib/data";
 import BackLink from "@/components/BackLink";
 import { createServiceRequestAction, getLocationEquipmentAction } from "../actions";
 import NewServiceRequestForm from "./NewServiceRequestForm";
@@ -11,6 +11,7 @@ export default async function NewServiceRequestPage({
   const params = await searchParams;
   const locations = listLocations({ status: "Open" });
   const companies = listServiceCompanies();
+  const parts = listParts();
   const preselected = params.locationId ? Number(params.locationId) : undefined;
 
   return (
@@ -24,6 +25,7 @@ export default async function NewServiceRequestPage({
         getEquipmentForLocation={getLocationEquipmentAction}
         locations={locations}
         companies={companies}
+        parts={parts}
         preselectedLocationId={preselected}
       />
     </div>

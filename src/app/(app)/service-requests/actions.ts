@@ -8,11 +8,24 @@ import {
   getEquipment,
   getOrCreateEquipment,
   listEquipmentForLocation,
+  setPartsForRequest,
   updateServiceRequest,
 } from "@/lib/data";
 
 export async function getLocationEquipmentAction(locationId: number) {
   return listEquipmentForLocation(locationId);
+}
+
+function parsePartsFromFormData(formData: FormData): { part_id: number; quantity: number }[] {
+  const partIds = formData.getAll("part_id");
+  const quantities = formData.getAll("quantity");
+  const items: { part_id: number; quantity: number }[] = [];
+  for (let i = 0; i < partIds.length; i++) {
+    const part_id = Number(partIds[i]);
+    const quantity = Number(quantities[i]);
+    if (part_id && quantity > 0) items.push({ part_id, quantity });
+  }
+  return items;
 }
 
 export async function createServiceRequestAction(formData: FormData) {
@@ -55,6 +68,7 @@ export async function createServiceRequestAction(formData: FormData) {
     reported_by,
     scheduled_at,
   });
+  setPartsForRequest(id, parsePartsFromFormData(formData));
   revalidatePath("/service-requests");
   redirect(`/service-requests/${id}`);
 }
@@ -80,6 +94,7 @@ export async function updateServiceRequestAction(id: number, formData: FormData)
         : completedRaw || null,
     cost: costRaw ? Number(costRaw) : null,
   });
+  setPartsForRequest(id, parsePartsFromFormData(formData));
   revalidatePath(`/service-requests/${id}`);
   revalidatePath("/service-requests");
 }
