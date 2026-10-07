@@ -37,7 +37,7 @@ export default async function DashboardPage() {
   const stats = getDashboardStats();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-charcoal">Dashboard</h1>
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
             href="/service-requests/new"
             className="rounded-md bg-hotsauce px-4 py-2 text-sm font-medium text-white hover:bg-hickory"
           >
-            + New Service Request
+            + Add Service Request
           </Link>
         </div>
       </div>

@@ -101,7 +101,7 @@ export default function NewLocationPage() {
           type="submit"
           className="rounded-md bg-hotsauce px-4 py-2 text-sm font-medium text-white hover:bg-hickory"
         >
-          Create Location
+          Add Location
         </button>
       </form>
     </div>

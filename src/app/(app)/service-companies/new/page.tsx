@@ -9,7 +9,7 @@ export default function NewServiceCompanyPage() {
         <BackLink fallbackHref="/service-companies" label="Back to service companies" />
         <h1 className="text-2xl font-semibold text-charcoal mt-1">Add Service Company</h1>
       </div>
-      <CompanyForm action={createServiceCompanyAction} submitLabel="Create Company" />
+      <CompanyForm action={createServiceCompanyAction} submitLabel="Add Service Company" />
     </div>
   );
 }

@@ -45,12 +45,12 @@ export default async function ServiceCompaniesPage({
             href="/service-companies/new"
             className="rounded-md bg-hotsauce px-3 py-2 text-sm font-medium text-white hover:bg-hickory"
           >
-            + Add Company
+            + Add Service Company
           </Link>
           {admin && allCompanies.length > 0 && (
             <ConfirmSubmitButton
               action={clearAllServiceCompaniesAction}
-              label="Clear All Companies"
+              label="Clear All Service Companies"
               confirmMessage={`Permanently delete all ${allCompanies.length} service companies? Service requests assigned to them will show as Unassigned rather than losing their history. This cannot be undone.`}
             />
           )}

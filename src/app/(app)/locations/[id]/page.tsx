@@ -32,7 +32,7 @@ export default async function LocationDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <BackLink fallbackHref="/locations" label="Back to locations" />
           <p className="text-sm text-stone-500 mt-1">Store #{location.store_number}</p>
@@ -43,7 +43,7 @@ export default async function LocationDetailPage({
             href={`/service-requests/new?locationId=${location.id}`}
             className="rounded-md bg-hotsauce px-3 py-2 text-sm font-medium text-white hover:bg-hickory"
           >
-            + New Service Request
+            + Add Service Request
           </Link>
           {admin && (
             <>

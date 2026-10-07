@@ -51,7 +51,7 @@ export default async function PartDetailPage({
             <h2 className="font-medium text-charcoal">Used on Service Requests</h2>
           </div>
           {requests.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-stone-500">Not used on any service request yet.</p>
+            <p className="px-4 py-6 text-sm text-stone-500">No service requests for this part yet.</p>
           ) : (
             <ul className="divide-y divide-stone-100">
               {requests.map((r) => (
