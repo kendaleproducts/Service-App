@@ -21,13 +21,13 @@ export default function ServiceDeskMark({ className = "h-10" }: { className?: st
       <svg viewBox="0 0 220 250" className="absolute inset-0 h-full w-full" aria-hidden="true">
         {/* Ring broken around the lower-right, where the wrench floats in the gap. */}
         <path
-          d="M168.16 211.22 A104 104 0 1 1 196.22 183.16"
+          d="M165.11 213.19 A104 104 0 1 1 198.19 180.11"
           fill="none"
           stroke="currentColor"
           strokeWidth="5"
           strokeLinecap="round"
         />
-        <g transform="translate(160.1,175.1) scale(1.95)">
+        <g transform="translate(152.3,167.3) scale(2.6)">
           <path d={WRENCH_PATH} fill="currentColor" />
         </g>
       </svg>
