@@ -15,6 +15,10 @@ const COLOR_MAP: Record<string, string> = {
   Open: "bg-green-100 text-green-800",
   Pending: "bg-spice text-hickory",
   Archived: "bg-stone-200 text-stone-600",
+  // equipment statuses
+  Active: "bg-green-100 text-green-800",
+  Obsolete: "bg-hotsauce/15 text-hickory",
+  Retired: "bg-stone-200 text-stone-600",
 };
 
 export default function Badge({ label }: { label: string }) {

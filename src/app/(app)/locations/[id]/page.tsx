@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getLocation, listNearestServiceCompanies, listServiceRequests } from "@/lib/data";
+import {
+  getLocation,
+  listEquipmentForLocation,
+  listNearestServiceCompanies,
+  listServiceRequests,
+} from "@/lib/data";
 import { LOCATION_STATUSES } from "@/lib/types";
 import Badge from "@/components/Badge";
 import BackLink from "@/components/BackLink";
@@ -24,6 +29,7 @@ export default async function LocationDetailPage({
   if (!location) notFound();
 
   const requests = listServiceRequests({ locationId: location.id });
+  const equipment = listEquipmentForLocation(location.id);
   const nearestCompanies = listNearestServiceCompanies(location.id, 3);
   const updateWithId = updateLocationAction.bind(null, location.id);
   const deleteWithId = deleteLocationAction.bind(null, location.id);
@@ -198,6 +204,38 @@ export default async function LocationDetailPage({
                         <span className="text-xs text-stone-500">· {r.service_company_name}</span>
                       )}
                     </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="bg-white border border-stone-200 rounded-lg">
+            <div className="px-4 py-3 border-b border-stone-200">
+              <h2 className="font-medium text-charcoal">Equipment on File</h2>
+            </div>
+            {equipment.length === 0 ? (
+              <p className="px-4 py-6 text-sm text-stone-500">
+                No equipment on file for this location yet. Units are added when a service
+                request is logged against a machine.
+              </p>
+            ) : (
+              <ul className="divide-y divide-stone-100">
+                {equipment.map((eq) => (
+                  <li key={eq.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                    <div>
+                      <Link
+                        href={`/equipment/${eq.id}`}
+                        className="text-sm font-medium text-charcoal hover:underline"
+                      >
+                        {eq.serial_number}
+                      </Link>
+                      <p className="text-xs text-stone-500">
+                        {eq.description ?? "No make/model on file"}
+                        {eq.installed_year ? ` · installed ${eq.installed_year}` : ""}
+                      </p>
+                    </div>
+                    <Badge label={eq.status} />
                   </li>
                 ))}
               </ul>

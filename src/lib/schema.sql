@@ -64,6 +64,9 @@ CREATE TABLE IF NOT EXISTS equipment (
   location_id INTEGER NOT NULL REFERENCES locations(id),
   serial_number TEXT NOT NULL,
   description TEXT,
+  installed_year INTEGER,
+  replacement_cost REAL,
+  status TEXT NOT NULL DEFAULT 'Active',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_equipment_location ON equipment(location_id);

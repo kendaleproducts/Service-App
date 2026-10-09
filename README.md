@@ -58,6 +58,14 @@ An admin session shows a small "Admin" badge in the sidebar. These buttons only 
 - **Parts** — a simple catalog (part number + description). No quantity/inventory tracking in-app; your parts spreadsheet is the source of truth.
 - **Service Requests** — the core record: a location, an issue, a priority/status, an assigned service company, equipment/serial info, parts needed, and a free-text timeline of notes.
 - **Service Tickets** — not a separate record. A one-page printable view generated from a Service Request (`/tickets/[id]`), meant to be printed or saved as a PDF for external processing, shipping, and billing.
+- **Equipment** — one row per machine at a location, keyed by serial number. Created automatically the first time a service request is logged against a machine; open a unit (from its location page or the Fleet report) to record its make/model, installed year, replacement cost, and status (Active / Obsolete / Retired). Those three fields are what drive the Fleet report.
+
+## Reports
+
+- **Service Requests** — counts and costs for a period, broken down by status, priority, and service company, with the matching request list.
+- **Fleet** — the quarterly equipment review. For the chosen period it identifies high-service-cost units, repeat failures, obsolete equipment (marked obsolete, or past the expected life since installed year), recommended replacements (obsolete, lifetime service cost above a set share of replacement cost, or too many calls in the last 12 months), and upcoming capital requirements (replacement cost of every recommended unit, by province). The thresholds are editable on the page; defaults are $1,500 period cost, 2 calls per period, a 10-year life, and replacement at 50% of replacement cost. Units with no installed year or replacement cost are called out so the data can be filled in.
+
+Both reports print cleanly via the Print Report button.
 
 ## Importing locations from Excel
 

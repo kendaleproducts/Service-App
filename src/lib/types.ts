@@ -75,11 +75,17 @@ export interface Part {
   updated_at: string;
 }
 
+export const EQUIPMENT_STATUSES = ["Active", "Obsolete", "Retired"] as const;
+export type EquipmentStatus = (typeof EQUIPMENT_STATUSES)[number];
+
 export interface Equipment {
   id: number;
   location_id: number;
   serial_number: string;
   description: string | null;
+  installed_year: number | null;
+  replacement_cost: number | null;
+  status: string;
   created_at: string;
 }
 

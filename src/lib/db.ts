@@ -56,3 +56,6 @@ addColumnIfMissing("locations", "latitude", "REAL");
 addColumnIfMissing("locations", "longitude", "REAL");
 addColumnIfMissing("parts", "size_weight", "TEXT");
 addColumnIfMissing("service_requests", "equipment_id", "INTEGER REFERENCES equipment(id)");
+addColumnIfMissing("equipment", "installed_year", "INTEGER");
+addColumnIfMissing("equipment", "replacement_cost", "REAL");
+addColumnIfMissing("equipment", "status", "TEXT NOT NULL DEFAULT 'Active'");

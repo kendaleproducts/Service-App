@@ -486,6 +486,213 @@ export function getOrCreateEquipment(input: {
   return Number(info.lastInsertRowid);
 }
 
+export interface EquipmentWithLocation extends Equipment {
+  store_number: string;
+  location_name: string;
+  city: string | null;
+  province: string | null;
+}
+
+export function getEquipmentWithLocation(id: number): EquipmentWithLocation | undefined {
+  return db
+    .prepare(
+      `SELECT e.*, l.store_number, l.name as location_name, l.city, l.province
+       FROM equipment e JOIN locations l ON l.id = e.location_id
+       WHERE e.id = ?`
+    )
+    .get(id) as EquipmentWithLocation | undefined;
+}
+
+export function updateEquipment(
+  id: number,
+  input: {
+    serial_number: string;
+    description: string | null;
+    installed_year: number | null;
+    replacement_cost: number | null;
+    status: string;
+  }
+): void {
+  db.prepare(
+    `UPDATE equipment SET serial_number=@serial_number, description=@description,
+       installed_year=@installed_year, replacement_cost=@replacement_cost, status=@status
+     WHERE id=@id`
+  ).run({ ...input, id });
+}
+
+export function listServiceRequestsForEquipment(equipmentId: number): ServiceRequestWithJoins[] {
+  return db
+    .prepare(
+      `SELECT sr.*, l.name as location_name, l.store_number, l.city, l.province,
+              sc.name as service_company_name
+       FROM service_requests sr
+       JOIN locations l ON l.id = sr.location_id
+       LEFT JOIN service_companies sc ON sc.id = sr.service_company_id
+       WHERE sr.equipment_id = ?
+       ORDER BY sr.reported_at DESC`
+    )
+    .all(equipmentId) as ServiceRequestWithJoins[];
+}
+
+// ---------- Fleet report ----------
+
+export interface FleetThresholds {
+  /** Service cost in the period at or above which a unit is "high service cost". */
+  highCost: number;
+  /** Requests in the period at or above which a unit is a "repeat failure". */
+  repeat: number;
+  /** Age in years at or above which a unit is considered obsolete. */
+  lifeYears: number;
+  /** Lifetime service cost as a fraction of replacement cost that triggers a replacement recommendation. */
+  costRatio: number;
+}
+
+export const DEFAULT_FLEET_THRESHOLDS: FleetThresholds = {
+  highCost: 1500,
+  repeat: 2,
+  lifeYears: 10,
+  costRatio: 0.5,
+};
+
+export interface FleetUnit extends EquipmentWithLocation {
+  period_requests: number;
+  period_cost: number;
+  lifetime_requests: number;
+  lifetime_cost: number;
+  trailing_year_requests: number;
+  last_service_at: string | null;
+  age_years: number | null;
+  highCost: boolean;
+  repeatFailure: boolean;
+  obsolete: boolean;
+  recommendReplace: boolean;
+  reasons: string[];
+}
+
+export interface FleetReport {
+  units: FleetUnit[];
+  highCost: FleetUnit[];
+  repeatFailures: FleetUnit[];
+  obsolete: FleetUnit[];
+  recommended: FleetUnit[];
+  capital: {
+    total: number;
+    missingEstimates: number;
+    byProvince: { province: string; count: number; total: number; missing: number }[];
+  };
+  retiredCount: number;
+}
+
+export function getFleetReport(opts: {
+  from?: string;
+  to?: string;
+  thresholds?: Partial<FleetThresholds>;
+}): FleetReport {
+  const t = { ...DEFAULT_FLEET_THRESHOLDS, ...opts.thresholds };
+  const from = opts.from ?? "0000-01-01";
+  const to = opts.to ?? "9999-12-31";
+  const thisYear = new Date().getUTCFullYear();
+
+  const rows = db
+    .prepare(
+      `SELECT e.*, l.store_number, l.name as location_name, l.city, l.province,
+         (SELECT COUNT(*) FROM service_requests sr WHERE sr.equipment_id = e.id
+            AND sr.status != 'Cancelled' AND date(sr.reported_at) BETWEEN @from AND @to) as period_requests,
+         (SELECT COALESCE(SUM(sr.cost), 0) FROM service_requests sr WHERE sr.equipment_id = e.id
+            AND sr.status != 'Cancelled' AND date(sr.reported_at) BETWEEN @from AND @to) as period_cost,
+         (SELECT COUNT(*) FROM service_requests sr WHERE sr.equipment_id = e.id
+            AND sr.status != 'Cancelled') as lifetime_requests,
+         (SELECT COALESCE(SUM(sr.cost), 0) FROM service_requests sr WHERE sr.equipment_id = e.id
+            AND sr.status != 'Cancelled') as lifetime_cost,
+         (SELECT COUNT(*) FROM service_requests sr WHERE sr.equipment_id = e.id
+            AND sr.status != 'Cancelled' AND date(sr.reported_at) >= date('now', '-12 months')) as trailing_year_requests,
+         (SELECT MAX(sr.reported_at) FROM service_requests sr WHERE sr.equipment_id = e.id
+            AND sr.status != 'Cancelled') as last_service_at
+       FROM equipment e
+       JOIN locations l ON l.id = e.location_id
+       ORDER BY l.store_number, e.serial_number`
+    )
+    .all({ from, to }) as Omit<
+    FleetUnit,
+    "age_years" | "highCost" | "repeatFailure" | "obsolete" | "recommendReplace" | "reasons"
+  >[];
+
+  const money = (n: number) => `$${n.toFixed(0)}`;
+
+  const units: FleetUnit[] = rows.map((r) => {
+    const age_years = r.installed_year ? thisYear - r.installed_year : null;
+    const retired = r.status === "Retired";
+    const reasons: string[] = [];
+
+    const highCost = !retired && r.period_cost >= t.highCost;
+    if (highCost) reasons.push(`${money(r.period_cost)} service cost this period`);
+
+    const repeatFailure = !retired && r.period_requests >= t.repeat;
+    if (repeatFailure) reasons.push(`${r.period_requests} service calls this period`);
+    else if (!retired && r.trailing_year_requests >= t.repeat + 1) {
+      reasons.push(`${r.trailing_year_requests} service calls in the last 12 months`);
+    }
+
+    const overAge = age_years != null && age_years >= t.lifeYears;
+    const obsolete = !retired && (r.status === "Obsolete" || overAge);
+    if (r.status === "Obsolete") reasons.push("Marked obsolete");
+    else if (overAge) reasons.push(`${age_years} years old (life ${t.lifeYears})`);
+
+    const costVsReplace =
+      !retired &&
+      r.replacement_cost != null &&
+      r.replacement_cost > 0 &&
+      r.lifetime_cost >= t.costRatio * r.replacement_cost;
+    if (costVsReplace) {
+      reasons.push(
+        `${money(r.lifetime_cost)} lifetime service vs ${money(r.replacement_cost as number)} to replace`
+      );
+    }
+
+    const recommendReplace =
+      !retired &&
+      (obsolete || costVsReplace || r.trailing_year_requests >= t.repeat + 1);
+
+    return { ...r, age_years, highCost, repeatFailure, obsolete, recommendReplace, reasons };
+  });
+
+  const recommended = units.filter((u) => u.recommendReplace);
+  const byProvinceMap = new Map<string, { count: number; total: number; missing: number }>();
+  let total = 0;
+  let missingEstimates = 0;
+  for (const u of recommended) {
+    const key = u.province ?? "Unknown";
+    const entry = byProvinceMap.get(key) ?? { count: 0, total: 0, missing: 0 };
+    entry.count += 1;
+    if (u.replacement_cost != null) {
+      entry.total += u.replacement_cost;
+      total += u.replacement_cost;
+    } else {
+      entry.missing += 1;
+      missingEstimates += 1;
+    }
+    byProvinceMap.set(key, entry);
+  }
+
+  return {
+    units,
+    highCost: units.filter((u) => u.highCost).sort((a, b) => b.period_cost - a.period_cost),
+    repeatFailures: units
+      .filter((u) => u.repeatFailure)
+      .sort((a, b) => b.period_requests - a.period_requests),
+    obsolete: units.filter((u) => u.obsolete).sort((a, b) => (b.age_years ?? 0) - (a.age_years ?? 0)),
+    recommended: recommended.sort((a, b) => b.lifetime_cost - a.lifetime_cost),
+    capital: {
+      total,
+      missingEstimates,
+      byProvince: [...byProvinceMap.entries()]
+        .map(([province, v]) => ({ province, ...v }))
+        .sort((a, b) => b.total - a.total),
+    },
+    retiredCount: units.filter((u) => u.status === "Retired").length,
+  };
+}
+
 // ---------- Service requests ----------
 
 export function listServiceRequests(filters: {
