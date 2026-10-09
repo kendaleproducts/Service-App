@@ -4,15 +4,78 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   addServiceRequestNote,
+  addVisit,
+  closeServiceRequest,
   createServiceRequest,
   deleteServiceRequest,
+  deleteVisit,
   getEquipment,
+  getLocationHistory,
   getOrCreateEquipment,
   listEquipmentForLocation,
+  reopenServiceRequest,
   setPartsForRequest,
   updateServiceRequest,
 } from "@/lib/data";
 import { requireAdmin } from "@/lib/session";
+import { VISIT_OUTCOMES } from "@/lib/types";
+
+export async function getLocationHistoryAction(locationId: number) {
+  return getLocationHistory(locationId);
+}
+
+function revalidateRequest(id: number) {
+  revalidatePath(`/service-requests/${id}`);
+  revalidatePath("/service-requests");
+  revalidatePath("/");
+  revalidatePath("/reports");
+  revalidatePath("/reports/fleet");
+}
+
+export async function addVisitAction(id: number, formData: FormData) {
+  const visited_on = String(formData.get("visited_on") ?? "").trim();
+  const work_performed = String(formData.get("work_performed") ?? "").trim();
+  const outcome = String(formData.get("outcome") ?? "").trim();
+  const companyRaw = String(formData.get("service_company_id") ?? "").trim();
+  const amountRaw = String(formData.get("amount") ?? "").trim();
+
+  const missing: string[] = [];
+  if (!visited_on) missing.push("Visit date");
+  if (!work_performed) missing.push("Work performed");
+  if (!(VISIT_OUTCOMES as readonly string[]).includes(outcome)) missing.push("Outcome");
+  if (missing.length > 0) {
+    throw new Error(`Missing: ${missing.join(", ")}`);
+  }
+
+  addVisit({
+    service_request_id: id,
+    service_company_id: companyRaw ? Number(companyRaw) : null,
+    visited_on,
+    work_performed,
+    outcome,
+    amount: amountRaw ? Number(amountRaw) : null,
+    invoice_ref: String(formData.get("invoice_ref") ?? "").trim() || null,
+  });
+  revalidateRequest(id);
+}
+
+export async function deleteVisitAction(id: number, visitId: number) {
+  await requireAdmin();
+  deleteVisit(visitId);
+  revalidateRequest(id);
+}
+
+export async function closeServiceRequestAction(id: number, formData: FormData) {
+  const resolution = String(formData.get("resolution") ?? "").trim();
+  if (!resolution) throw new Error("A resolution summary is required to close a ticket.");
+  closeServiceRequest(id, resolution);
+  revalidateRequest(id);
+}
+
+export async function reopenServiceRequestAction(id: number) {
+  reopenServiceRequest(id);
+  revalidateRequest(id);
+}
 
 export async function getLocationEquipmentAction(locationId: number) {
   return listEquipmentForLocation(locationId);

@@ -31,6 +31,14 @@ export default function ServiceRequestRow({ r }: { r: ServiceRequestWithJoins })
         <Badge label={r.priority} />
       </td>
       <td className="px-4 py-2 text-stone-600">{r.service_company_name ?? "—"}</td>
+      <td className="px-4 py-2 text-stone-600 whitespace-nowrap">
+        {r.visit_count ? `${r.visit_count} visit(s)` : "No visits"}
+        {r.last_visit_on && (
+          <span className="block text-xs text-stone-400">
+            last {new Date(r.last_visit_on + "T00:00:00").toLocaleDateString()}
+          </span>
+        )}
+      </td>
       <td className="px-4 py-2 text-stone-600">{new Date(r.reported_at).toLocaleDateString()}</td>
     </tr>
   );

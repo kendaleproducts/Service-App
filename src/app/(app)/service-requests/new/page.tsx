@@ -1,6 +1,10 @@
 import { listLocations, listParts, listServiceCompanies } from "@/lib/data";
 import BackLink from "@/components/BackLink";
-import { createServiceRequestAction, getLocationEquipmentAction } from "../actions";
+import {
+  createServiceRequestAction,
+  getLocationEquipmentAction,
+  getLocationHistoryAction,
+} from "../actions";
 import NewServiceRequestForm from "./NewServiceRequestForm";
 
 export default async function NewServiceRequestPage({
@@ -23,6 +27,7 @@ export default async function NewServiceRequestPage({
       <NewServiceRequestForm
         action={createServiceRequestAction}
         getEquipmentForLocation={getLocationEquipmentAction}
+        getLocationHistory={getLocationHistoryAction}
         locations={locations}
         companies={companies}
         parts={parts}

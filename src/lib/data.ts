@@ -4,10 +4,12 @@ import type {
   Customer,
   Equipment,
   Location,
+  LocationServiceHistory,
   Part,
   ServiceCompany,
   ServiceRequestNote,
   ServiceRequestWithJoins,
+  ServiceVisit,
 } from "./types";
 
 // ---------- Customers ----------
@@ -228,9 +230,11 @@ export const wipeServiceHistoryForLocation = db.transaction((locationId: number)
     .all(locationId) as { id: number }[];
   const deleteParts = db.prepare("DELETE FROM service_request_parts WHERE service_request_id = ?");
   const deleteNotes = db.prepare("DELETE FROM service_request_notes WHERE service_request_id = ?");
+  const deleteVisits = db.prepare("DELETE FROM service_visits WHERE service_request_id = ?");
   for (const { id } of requestIds) {
     deleteParts.run(id);
     deleteNotes.run(id);
+    deleteVisits.run(id);
   }
   db.prepare(
     "UPDATE part_shipments SET service_request_id = NULL WHERE service_request_id IN (SELECT id FROM service_requests WHERE location_id = ?)"
@@ -269,6 +273,9 @@ export const deleteAllServiceCompanies = db.transaction(() => {
   db.prepare(
     "UPDATE part_shipments SET service_company_id = NULL WHERE service_company_id IS NOT NULL"
   ).run();
+  db.prepare(
+    "UPDATE service_visits SET service_company_id = NULL WHERE service_company_id IS NOT NULL"
+  ).run();
   db.prepare("DELETE FROM service_companies").run();
 });
 
@@ -280,6 +287,9 @@ export const unassignCompanyFromHistory = db.transaction((companyId: number) => 
   db.prepare(
     "UPDATE part_shipments SET service_company_id = NULL WHERE service_company_id = ?"
   ).run(companyId);
+  db.prepare("UPDATE service_visits SET service_company_id = NULL WHERE service_company_id = ?").run(
+    companyId
+  );
 });
 
 /** Permanently removes a service company, unassigning it from any past requests/shipments first. Admin-only. */
@@ -610,11 +620,11 @@ export function getFleetReport(opts: {
       `SELECT e.*, l.store_number, l.name as location_name, l.city, l.province,
          (SELECT COUNT(*) FROM service_requests sr WHERE sr.equipment_id = e.id
             AND sr.status != 'Cancelled' AND date(sr.reported_at) BETWEEN @from AND @to) as period_requests,
-         (SELECT COALESCE(SUM(sr.cost), 0) FROM service_requests sr WHERE sr.equipment_id = e.id
+         (SELECT COALESCE(SUM(COALESCE(sr.cost, 0) + COALESCE((SELECT SUM(v.amount) FROM service_visits v WHERE v.service_request_id = sr.id), 0)), 0) FROM service_requests sr WHERE sr.equipment_id = e.id
             AND sr.status != 'Cancelled' AND date(sr.reported_at) BETWEEN @from AND @to) as period_cost,
          (SELECT COUNT(*) FROM service_requests sr WHERE sr.equipment_id = e.id
             AND sr.status != 'Cancelled') as lifetime_requests,
-         (SELECT COALESCE(SUM(sr.cost), 0) FROM service_requests sr WHERE sr.equipment_id = e.id
+         (SELECT COALESCE(SUM(COALESCE(sr.cost, 0) + COALESCE((SELECT SUM(v.amount) FROM service_visits v WHERE v.service_request_id = sr.id), 0)), 0) FROM service_requests sr WHERE sr.equipment_id = e.id
             AND sr.status != 'Cancelled') as lifetime_cost,
          (SELECT COUNT(*) FROM service_requests sr WHERE sr.equipment_id = e.id
             AND sr.status != 'Cancelled' AND date(sr.reported_at) >= date('now', '-12 months')) as trailing_year_requests,
@@ -707,6 +717,10 @@ export function getFleetReport(opts: {
 
 // ---------- Service requests ----------
 
+/** A request's billable total: its own cost (other charges) plus every visit's amount. */
+const TOTAL_COST_SQL =
+  "COALESCE(sr.cost, 0) + COALESCE((SELECT SUM(v.amount) FROM service_visits v WHERE v.service_request_id = sr.id), 0)";
+
 export function listServiceRequests(filters: {
   q?: string;
   status?: string;
@@ -756,10 +770,15 @@ export function listServiceRequests(filters: {
     .prepare(
       `SELECT sr.*, l.name as location_name, l.store_number as store_number,
               l.city as city, l.province as province,
-              sc.name as service_company_name
+              sc.name as service_company_name,
+              e.serial_number as equipment_serial_number,
+              ${TOTAL_COST_SQL} as total_cost,
+              (SELECT COUNT(*) FROM service_visits v WHERE v.service_request_id = sr.id) as visit_count,
+              (SELECT MAX(v.visited_on) FROM service_visits v WHERE v.service_request_id = sr.id) as last_visit_on
        FROM service_requests sr
        JOIN locations l ON l.id = sr.location_id
        LEFT JOIN service_companies sc ON sc.id = sr.service_company_id
+       LEFT JOIN equipment e ON e.id = sr.equipment_id
        ${where}
        ORDER BY sr.created_at DESC`
     )
@@ -794,7 +813,7 @@ export function getServiceRequestReport(filters: {
       .sort((a, b) => b.count - a.count);
   };
 
-  const costs = requests.map((r) => r.cost).filter((c): c is number => c != null);
+  const costs = requests.map((r) => r.total_cost ?? r.cost ?? 0).filter((c) => c > 0);
   const totalCost = costs.reduce((sum, c) => sum + c, 0);
 
   return {
@@ -817,7 +836,9 @@ export function getServiceRequest(id: number): ServiceRequestWithJoins | undefin
               l.phone as location_phone,
               sc.name as service_company_name, sc.phone as service_company_phone,
               sc.contact_name as service_company_contact,
-              e.serial_number as equipment_serial_number
+              e.serial_number as equipment_serial_number,
+              ${TOTAL_COST_SQL} as total_cost,
+              (SELECT COUNT(*) FROM service_visits v WHERE v.service_request_id = sr.id) as visit_count
        FROM service_requests sr
        JOIN locations l ON l.id = sr.location_id
        LEFT JOIN service_companies sc ON sc.id = sr.service_company_id
@@ -957,6 +978,78 @@ export function listServiceRequestNotes(serviceRequestId: number): ServiceReques
     .all(serviceRequestId) as ServiceRequestNote[];
 }
 
+// ---------- Visits, closing, location history ----------
+
+export interface ServiceVisitWithCompany extends ServiceVisit {
+  service_company_name: string | null;
+}
+
+export function listVisitsForRequest(serviceRequestId: number): ServiceVisitWithCompany[] {
+  return db
+    .prepare(
+      `SELECT v.*, sc.name as service_company_name
+       FROM service_visits v
+       LEFT JOIN service_companies sc ON sc.id = v.service_company_id
+       WHERE v.service_request_id = ?
+       ORDER BY v.visited_on DESC, v.id DESC`
+    )
+    .all(serviceRequestId) as ServiceVisitWithCompany[];
+}
+
+/** Logs a visit and moves an open request's status to match the outcome. */
+export const addVisit = db.transaction(
+  (input: {
+    service_request_id: number;
+    service_company_id: number | null;
+    visited_on: string;
+    work_performed: string;
+    outcome: string;
+    amount: number | null;
+    invoice_ref: string | null;
+  }) => {
+    db.prepare(
+      `INSERT INTO service_visits
+        (service_request_id, service_company_id, visited_on, work_performed, outcome, amount, invoice_ref)
+       VALUES (@service_request_id, @service_company_id, @visited_on, @work_performed, @outcome, @amount, @invoice_ref)`
+    ).run(input);
+    const status = input.outcome === "Awaiting parts" ? "Awaiting Parts" : "In Progress";
+    db.prepare(
+      `UPDATE service_requests SET status = ?, updated_at = datetime('now')
+       WHERE id = ? AND status NOT IN ('Completed', 'Cancelled')`
+    ).run(status, input.service_request_id);
+  }
+);
+
+export function deleteVisit(visitId: number): void {
+  db.prepare("DELETE FROM service_visits WHERE id = ?").run(visitId);
+}
+
+export function closeServiceRequest(id: number, resolution: string): void {
+  db.prepare(
+    `UPDATE service_requests
+     SET status = 'Completed', completed_at = datetime('now'), resolution = ?, updated_at = datetime('now')
+     WHERE id = ?`
+  ).run(resolution, id);
+}
+
+export function reopenServiceRequest(id: number): void {
+  db.prepare(
+    `UPDATE service_requests
+     SET status = 'In Progress', completed_at = NULL, resolution = NULL, updated_at = datetime('now')
+     WHERE id = ?`
+  ).run(id);
+}
+
+const CLOSED_STATUSES = ["Completed", "Cancelled"];
+
+export function getLocationHistory(locationId: number): LocationServiceHistory {
+  const all = listServiceRequests({ locationId });
+  return {
+    open: all.filter((r) => !CLOSED_STATUSES.includes(r.status)),
+    recent: all.filter((r) => CLOSED_STATUSES.includes(r.status)).slice(0, 5),
+  };
+}
+
 /** Permanently removes a service request and its notes/parts. There's no separate ticket record to delete — the ticket is only ever rendered live from the request, so deleting the request removes its ticket too. Admin-only. */
 export const deleteServiceRequest = db.transaction((serviceRequestId: number) => {
   db.prepare("DELETE FROM service_request_parts WHERE service_request_id = ?").run(
@@ -965,6 +1058,7 @@ export const deleteServiceRequest = db.transaction((serviceRequestId: number) =>
   db.prepare("DELETE FROM service_request_notes WHERE service_request_id = ?").run(
     serviceRequestId
   );
+  db.prepare("DELETE FROM service_visits WHERE service_request_id = ?").run(serviceRequestId);
   db.prepare("UPDATE part_shipments SET service_request_id = NULL WHERE service_request_id = ?").run(
     serviceRequestId
   );

@@ -81,6 +81,7 @@ export default async function ServiceRequestsPage({
               <th className="px-4 py-2 font-medium">Status</th>
               <th className="px-4 py-2 font-medium">Priority</th>
               <th className="px-4 py-2 font-medium">Company</th>
+              <th className="px-4 py-2 font-medium">Progress</th>
               <th className="px-4 py-2 font-medium">Reported</th>
             </tr>
           </thead>
@@ -90,7 +91,7 @@ export default async function ServiceRequestsPage({
             ))}
             {requests.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-stone-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-stone-500">
                   No service requests found.
                 </td>
               </tr>

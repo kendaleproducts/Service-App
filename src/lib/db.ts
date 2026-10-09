@@ -59,3 +59,4 @@ addColumnIfMissing("service_requests", "equipment_id", "INTEGER REFERENCES equip
 addColumnIfMissing("equipment", "installed_year", "INTEGER");
 addColumnIfMissing("equipment", "replacement_cost", "REAL");
 addColumnIfMissing("equipment", "status", "TEXT NOT NULL DEFAULT 'Active'");
+addColumnIfMissing("service_requests", "resolution", "TEXT");

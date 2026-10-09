@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS service_requests (
   scheduled_at TEXT,
   completed_at TEXT,
   cost REAL,
+  resolution TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -99,6 +100,19 @@ CREATE TABLE IF NOT EXISTS service_request_notes (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_notes_request ON service_request_notes(service_request_id);
+
+CREATE TABLE IF NOT EXISTS service_visits (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  service_request_id INTEGER NOT NULL REFERENCES service_requests(id),
+  service_company_id INTEGER REFERENCES service_companies(id),
+  visited_on TEXT NOT NULL,
+  work_performed TEXT NOT NULL,
+  outcome TEXT NOT NULL,
+  amount REAL,
+  invoice_ref TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_service_visits_request ON service_visits(service_request_id);
 
 CREATE TABLE IF NOT EXISTS service_request_parts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { haversineKm } from "@/lib/geo";
+import Link from "next/link";
 import { SERVICE_REQUEST_PRIORITIES } from "@/lib/types";
-import type { Equipment, Part } from "@/lib/types";
+import type { Equipment, LocationServiceHistory, Part } from "@/lib/types";
 import LocationPickerMap from "@/components/LocationPickerMap";
 import PartsField from "../PartsField";
 
@@ -30,6 +31,7 @@ interface CompanyOption {
 export default function NewServiceRequestForm({
   action,
   getEquipmentForLocation,
+  getLocationHistory,
   locations,
   companies,
   parts,
@@ -37,6 +39,7 @@ export default function NewServiceRequestForm({
 }: {
   action: (formData: FormData) => Promise<void>;
   getEquipmentForLocation: (locationId: number) => Promise<Equipment[]>;
+  getLocationHistory: (locationId: number) => Promise<LocationServiceHistory>;
   locations: LocationOption[];
   companies: CompanyOption[];
   parts: Part[];
@@ -57,13 +60,24 @@ export default function NewServiceRequestForm({
   const [isLoadingEquipment, startEquipmentTransition] = useTransition();
   const thisYear = new Date().getFullYear();
 
+  const [history, setHistory] = useState<LocationServiceHistory | null>(null);
+
   useEffect(() => {
     if (!locationId) return;
     startEquipmentTransition(async () => {
-      const list = await getEquipmentForLocation(Number(locationId));
+      const [list, hist] = await Promise.all([
+        getEquipmentForLocation(Number(locationId)),
+        getLocationHistory(Number(locationId)),
+      ]);
       setEquipmentList(list);
+      setHistory(hist);
     });
-  }, [locationId, getEquipmentForLocation]);
+  }, [locationId, getEquipmentForLocation, getLocationHistory]);
+
+  const openTicketForUnit =
+    equipmentId && history
+      ? history.open.find((r) => String(r.equipment_id) === equipmentId)
+      : undefined;
 
   const nearestCompanies = useMemo(() => {
     const location = locations.find((l) => String(l.id) === locationId);
@@ -107,6 +121,7 @@ export default function NewServiceRequestForm({
     setNewDescription("");
     setNewYear("");
     setEquipmentList([]);
+    setHistory(null);
   }
 
   return (
@@ -125,7 +140,10 @@ export default function NewServiceRequestForm({
           </option>
           {locations.map((l) => (
             <option key={l.id} value={l.id}>
-              #{l.store_number} — {l.name} ({l.city}, {l.province})
+              #{l.store_number} — {l.name}
+              {l.city || l.province
+                ? ` (${[l.city, l.province].filter(Boolean).join(", ")})`
+                : ""}
             </option>
           ))}
         </select>
@@ -137,11 +155,80 @@ export default function NewServiceRequestForm({
         onSelect={selectLocation}
       />
 
+      {locationId && history && (history.open.length > 0 || history.recent.length > 0) && (
+        <div className="rounded-lg border border-stone-200 bg-white overflow-hidden">
+          <div className="px-4 py-2 border-b border-stone-200 text-xs font-medium text-stone-500">
+            History at this location
+          </div>
+          {history.open.length > 0 && (
+            <div className="px-4 py-3 bg-hotsauce/5 border-b border-stone-200">
+              <p className="text-sm font-medium text-hickory">
+                {history.open.length} open ticket(s) — check these before creating another
+              </p>
+              <ul className="mt-2 space-y-1">
+                {history.open.map((r) => (
+                  <li key={r.id} className="text-sm">
+                    <Link
+                      href={`/service-requests/${r.id}`}
+                      target="_blank"
+                      className="font-medium text-charcoal hover:underline"
+                    >
+                      #{r.id} · {r.issue_description}
+                    </Link>
+                    <span className="text-xs text-stone-500">
+                      {" "}
+                      — {r.status}
+                      {r.equipment_serial_number ? ` · ${r.equipment_serial_number}` : ""} ·{" "}
+                      {new Date(r.reported_at).toLocaleDateString()}
+                      {r.visit_count ? ` · ${r.visit_count} visit(s)` : ""}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {history.recent.length > 0 && (
+            <ul className="divide-y divide-stone-100">
+              {history.recent.map((r) => (
+                <li key={r.id} className="px-4 py-2 text-sm">
+                  <Link
+                    href={`/service-requests/${r.id}`}
+                    target="_blank"
+                    className="text-charcoal hover:underline"
+                  >
+                    {r.issue_description}
+                  </Link>
+                  <span className="text-xs text-stone-500">
+                    {" "}
+                    — {r.status}
+                    {r.equipment_serial_number ? ` · ${r.equipment_serial_number}` : ""} ·{" "}
+                    {new Date(r.reported_at).toLocaleDateString()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       {locationId && (
         <div>
           <label className="block text-xs font-medium text-stone-500 mb-1">
             Equipment Being Serviced
           </label>
+          {openTicketForUnit && (
+            <p className="mb-2 rounded-md border border-hotsauce/40 bg-hotsauce/5 px-3 py-2 text-sm text-hickory">
+              This machine already has open ticket{" "}
+              <Link
+                href={`/service-requests/${openTicketForUnit.id}`}
+                target="_blank"
+                className="font-medium underline"
+              >
+                #{openTicketForUnit.id}
+              </Link>
+              . If this is the same problem, log a visit there instead of opening a new request.
+            </p>
+          )}
 
           {isLoadingEquipment && (
             <p className="text-xs text-stone-500">Loading equipment on file...</p>

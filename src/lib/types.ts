@@ -11,6 +11,9 @@ export type ServiceRequestStatus = (typeof SERVICE_REQUEST_STATUSES)[number];
 export const SERVICE_REQUEST_PRIORITIES = ["Low", "Normal", "High", "Urgent"] as const;
 export type ServiceRequestPriority = (typeof SERVICE_REQUEST_PRIORITIES)[number];
 
+export const VISIT_OUTCOMES = ["Follow-up required", "Awaiting parts", "Resolved"] as const;
+export type VisitOutcome = (typeof VISIT_OUTCOMES)[number];
+
 export const LOCATION_STATUSES = ["Open", "Pending", "Archived"] as const;
 export type LocationStatus = (typeof LOCATION_STATUSES)[number];
 
@@ -103,6 +106,7 @@ export interface ServiceRequest {
   scheduled_at: string | null;
   completed_at: string | null;
   cost: number | null;
+  resolution: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -114,11 +118,32 @@ export interface ServiceRequestWithJoins extends ServiceRequest {
   province: string | null;
   service_company_name: string | null;
   equipment_serial_number?: string | null;
+  /** cost + sum of visit amounts */
+  total_cost?: number;
+  visit_count?: number;
+  last_visit_on?: string | null;
   location_address?: string | null;
   location_postal_code?: string | null;
   location_phone?: string | null;
   service_company_phone?: string | null;
   service_company_contact?: string | null;
+}
+
+export interface ServiceVisit {
+  id: number;
+  service_request_id: number;
+  service_company_id: number | null;
+  visited_on: string;
+  work_performed: string;
+  outcome: string;
+  amount: number | null;
+  invoice_ref: string | null;
+  created_at: string;
+}
+
+export interface LocationServiceHistory {
+  open: ServiceRequestWithJoins[];
+  recent: ServiceRequestWithJoins[];
 }
 
 export interface ServiceRequestNote {
