@@ -14,8 +14,8 @@ const openSans = Open_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Service Tracker",
-  description: "Service call, parts, and vendor tracking",
+  title: "Kendale Service Desk",
+  description: "Service requests, tickets, and vendor dispatch for Kendale Products Ltd",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

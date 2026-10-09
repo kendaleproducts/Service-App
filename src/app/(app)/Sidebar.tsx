@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import FlameMark from "@/components/FlameMark";
+import ServiceDeskMark from "@/components/ServiceDeskMark";
 import { logout } from "@/app/login/actions";
 
 const NAV_LINKS = [
@@ -22,14 +22,9 @@ function isActive(pathname: string, href: string) {
 
 function BrandMark() {
   return (
-    <Link href="/" className="flex items-center gap-2 font-heading font-medium text-white">
-      <FlameMark className="h-7 w-auto shrink-0" />
-      <span>
-        Service Tracker
-        <span className="block text-[10px] font-sans font-normal tracking-wide text-white/50 -mt-0.5">
-          KENDALE PRODUCTS LTD
-        </span>
-      </span>
+    <Link href="/" className="flex items-center gap-2.5 font-heading font-medium text-white">
+      <ServiceDeskMark className="h-9 text-white" badgeFill="#1d1b1b" />
+      <span className="leading-tight">Kendale Service Desk</span>
     </Link>
   );
 }

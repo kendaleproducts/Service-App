@@ -1,4 +1,4 @@
-# Service Tracker
+# Kendale Service Desk
 
 A lightweight, web-based service tracking system for managing cooking equipment service calls and contracted service companies — built for a single dispatch location (Fort Erie, ON) supporting a customer's locations across Canada. The app's core output is a one-page printable **Service Ticket** for each request, handed off for processing, shipping, and billing outside the app.
 
