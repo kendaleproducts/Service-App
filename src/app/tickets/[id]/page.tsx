@@ -37,7 +37,7 @@ export default async function ServiceTicketPage({
       <div className="max-w-[8.5in] mx-auto bg-white border border-stone-200 print:border-0 p-10 text-sm text-charcoal">
         <div className="flex items-start justify-between border-b border-stone-200 pb-4 mb-6">
           <div className="flex items-center gap-3">
-            <ServiceDeskMark className="h-12 text-charcoal" badgeFill="#ffffff" />
+            <ServiceDeskMark className="h-12 text-charcoal" />
             <div>
               <p className="font-heading font-semibold text-lg leading-tight">
                 Kendale Service Desk

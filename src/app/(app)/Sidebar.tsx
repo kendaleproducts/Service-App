@@ -23,7 +23,7 @@ function isActive(pathname: string, href: string) {
 function BrandMark() {
   return (
     <Link href="/" className="flex items-center gap-2.5 font-heading font-medium text-white">
-      <ServiceDeskMark className="h-9 text-white" badgeFill="#1d1b1b" />
+      <ServiceDeskMark className="h-9 text-white" />
       <span className="leading-tight">Kendale Service Desk</span>
     </Link>
   );

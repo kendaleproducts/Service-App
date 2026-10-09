@@ -14,7 +14,7 @@ export default async function LoginPage({
     <div className="min-h-screen flex items-center justify-center bg-charcoal px-4">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-6">
-          <ServiceDeskMark className="h-20 mb-3 text-white" badgeFill="#1d1b1b" />
+          <ServiceDeskMark className="h-20 mb-3 text-white" />
           <h1 className="text-xl font-heading font-medium text-white">Kendale Service Desk</h1>
           <p className="text-sm text-white/50 mt-1">Kendale Products Ltd &middot; Fort Erie, ON</p>
         </div>
