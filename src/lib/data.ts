@@ -465,23 +465,35 @@ export function getOrCreateEquipment(input: {
   location_id: number;
   serial_number: string;
   description?: string | null;
+  installed_year?: number | null;
 }): number {
   const serial = input.serial_number.trim();
+  const installedYear = input.installed_year || null;
   const existing = db
     .prepare(
       "SELECT id FROM equipment WHERE location_id = @location_id AND lower(trim(serial_number)) = lower(@serial)"
     )
     .get({ location_id: input.location_id, serial }) as { id: number } | undefined;
-  if (existing) return existing.id;
+  if (existing) {
+    // Same serial re-entered as "new": keep the record, but fill in a year if it had none.
+    if (installedYear) {
+      db.prepare(
+        "UPDATE equipment SET installed_year = ? WHERE id = ? AND installed_year IS NULL"
+      ).run(installedYear, existing.id);
+    }
+    return existing.id;
+  }
 
   const info = db
     .prepare(
-      "INSERT INTO equipment (location_id, serial_number, description) VALUES (@location_id, @serial_number, @description)"
+      `INSERT INTO equipment (location_id, serial_number, description, installed_year)
+       VALUES (@location_id, @serial_number, @description, @installed_year)`
     )
     .run({
       location_id: input.location_id,
       serial_number: serial,
       description: input.description || null,
+      installed_year: installedYear,
     });
   return Number(info.lastInsertRowid);
 }

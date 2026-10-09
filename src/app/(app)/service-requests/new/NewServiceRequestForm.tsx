@@ -53,7 +53,9 @@ export default function NewServiceRequestForm({
   const [showNewEquipment, setShowNewEquipment] = useState(false);
   const [newSerial, setNewSerial] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [newYear, setNewYear] = useState("");
   const [isLoadingEquipment, startEquipmentTransition] = useTransition();
+  const thisYear = new Date().getFullYear();
 
   useEffect(() => {
     if (!locationId) return;
@@ -103,6 +105,7 @@ export default function NewServiceRequestForm({
     setShowNewEquipment(false);
     setNewSerial("");
     setNewDescription("");
+    setNewYear("");
     setEquipmentList([]);
   }
 
@@ -205,6 +208,18 @@ export default function NewServiceRequestForm({
                 onChange={(e) => setNewDescription(e.target.value)}
                 className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
               />
+              <input
+                name="installed_year"
+                type="number"
+                required
+                min={1980}
+                max={thisYear}
+                step={1}
+                placeholder={`Installed year (e.g. ${thisYear - 5})`}
+                value={newYear}
+                onChange={(e) => setNewYear(e.target.value)}
+                className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm"
+              />
               {equipmentList.length > 0 && (
                 <button
                   type="button"
@@ -212,6 +227,7 @@ export default function NewServiceRequestForm({
                     setShowNewEquipment(false);
                     setNewSerial("");
                     setNewDescription("");
+                    setNewYear("");
                   }}
                   className="text-xs text-stone-500 hover:text-hotsauce"
                 >

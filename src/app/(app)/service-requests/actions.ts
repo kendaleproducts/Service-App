@@ -39,6 +39,7 @@ export async function createServiceRequestAction(formData: FormData) {
   const existingEquipmentIdRaw = String(formData.get("equipment_id") ?? "").trim();
   const newSerialNumber = String(formData.get("new_serial_number") ?? "").trim();
   const equipment_description = String(formData.get("equipment_description") ?? "").trim();
+  const installedYearRaw = String(formData.get("installed_year") ?? "").trim();
 
   const missing: string[] = [];
   if (!location_id) missing.push("Location");
@@ -47,6 +48,7 @@ export async function createServiceRequestAction(formData: FormData) {
   if (!reported_by) missing.push("Reported by");
   if (!scheduled_at) missing.push("Scheduled date");
   if (!existingEquipmentIdRaw && !newSerialNumber) missing.push("Equipment / serial number");
+  if (!existingEquipmentIdRaw && !installedYearRaw) missing.push("Installed year");
   if (missing.length > 0) {
     throw new Error(`All fields are required. Missing: ${missing.join(", ")}`);
   }
@@ -57,6 +59,7 @@ export async function createServiceRequestAction(formData: FormData) {
         location_id,
         serial_number: newSerialNumber,
         description: equipment_description || null,
+        installed_year: Number(installedYearRaw),
       });
   const resolvedEquipment = getEquipment(equipment_id);
 
