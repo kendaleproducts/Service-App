@@ -1,5 +1,7 @@
 # Kendale Service Desk
 
+> This repository also contains **Daniel & Partners Online**, a standalone sandbox for a virtual legal-services offering, in [`daniel-partners-online/`](daniel-partners-online/README.md). It has its own `package.json` and is independent of the app described below.
+
 A lightweight, web-based service tracking system for managing cooking equipment service calls and contracted service companies — built for a single dispatch location (Fort Erie, ON) supporting a customer's locations across Canada. The app's core output is a one-page printable **Service Ticket** for each request, handed off for processing, shipping, and billing outside the app.
 
 Currently configured for **Mary Brown's** (hundreds of locations). Built to be a launch pad for onboarding additional customers later — the data model already supports multiple customers, even though the UI currently focuses on one.

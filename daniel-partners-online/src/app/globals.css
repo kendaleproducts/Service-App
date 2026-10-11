@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+:root {
+  /*
+   * Daniel & Partners LLP palette — taken from niagaralaw.ca:
+   * near-black backgrounds, white type, brass-gold accent (the "&" in the
+   * wordmark). Light "paper" tones are used for working screens (forms,
+   * portal, firm desk) where long reading needs a light surface.
+   * Swap the hex values here and every component follows.
+   */
+  --dp-black: #0a0a0b;
+  --dp-charcoal: #151618;
+  --dp-graphite: #222428;
+  --dp-smoke: #3a3d43;
+  --dp-gold: #b8963e;
+  --dp-gold-deep: #94772f;
+  --dp-gold-soft: #ead9ad;
+  --dp-white: #ffffff;
+  --dp-ivory: #f5f3ee;
+  --dp-paper: #fdfcfa;
+  --dp-stone: #e2ded5;
+  --dp-ink: #151618;
+  --dp-slate: #5b6068;
+  --dp-mist: #8c9199;
+  --dp-green: #2f6b4f;
+  --dp-green-soft: #dcebe2;
+  --dp-red: #9c3b2f;
+  --dp-red-soft: #f3dfdb;
+  --dp-amber: #a8701f;
+  --dp-amber-soft: #f4e7cf;
+
+  --background: var(--dp-ivory);
+  --foreground: var(--dp-ink);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-black: var(--dp-black);
+  --color-charcoal: var(--dp-charcoal);
+  --color-graphite: var(--dp-graphite);
+  --color-smoke: var(--dp-smoke);
+  --color-gold: var(--dp-gold);
+  --color-gold-deep: var(--dp-gold-deep);
+  --color-gold-soft: var(--dp-gold-soft);
+  --color-ivory: var(--dp-ivory);
+  --color-paper: var(--dp-paper);
+  --color-stone: var(--dp-stone);
+  --color-ink: var(--dp-ink);
+  --color-slate: var(--dp-slate);
+  --color-mist: var(--dp-mist);
+  --color-green: var(--dp-green);
+  --color-green-soft: var(--dp-green-soft);
+  --color-red: var(--dp-red);
+  --color-red-soft: var(--dp-red-soft);
+  --color-amber: var(--dp-amber);
+  --color-amber-soft: var(--dp-amber-soft);
+  --font-sans: var(--font-source-sans);
+  --font-display: var(--font-josefin);
+  --font-serif: var(--font-cormorant);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-source-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headlines: thin, wide-tracked, uppercase geometric sans, as on niagaralaw.ca */
+h1,
+h2,
+.font-display {
+  font-family: var(--font-josefin), "Futura", "Century Gothic", sans-serif;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.15;
+}
+
+h3,
+h4 {
+  font-family: var(--font-josefin), "Futura", "Century Gothic", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+/* Wordmark serif */
+.font-serif {
+  font-family: var(--font-cormorant), Georgia, "Times New Roman", serif;
+}
+
+input,
+select,
+textarea {
+  background: var(--dp-paper);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--dp-gold);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dp-gold) 30%, transparent);
+}
+
+/* Reusable pieces (registered as utilities so they can be composed with @apply) */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-[13px] font-display font-normal uppercase tracking-[0.2em] transition-colors disabled:opacity-60 disabled:cursor-not-allowed;
+}
+@utility btn-sm {
+  @apply px-4 py-2 text-[11px] tracking-[0.16em] rounded-lg;
+}
+/* on dark surfaces */
+@utility btn-white {
+  @apply btn bg-white text-brand-black hover:bg-gold-soft;
+}
+@utility btn-outline-white {
+  @apply btn border border-white text-white hover:bg-white hover:text-brand-black;
+}
+/* on light surfaces */
+@utility btn-dark {
+  @apply btn bg-brand-black text-white hover:bg-graphite;
+}
+@utility btn-gold {
+  @apply btn bg-gold text-brand-black hover:bg-gold-deep hover:text-white;
+}
+@utility btn-outline {
+  @apply btn border border-brand-black/70 text-brand-black hover:bg-brand-black hover:text-white;
+}
+@utility btn-ghost {
+  @apply btn text-brand-black hover:bg-brand-black/5;
+}
+@utility card {
+  @apply rounded-xl border border-stone bg-paper shadow-[0_1px_2px_rgba(10,10,11,0.05)];
+}
+@utility card-dark {
+  @apply rounded-xl border border-white/10 bg-charcoal text-white;
+}
+@utility field {
+  @apply w-full rounded-lg border border-stone px-3 py-2.5 text-[15px] text-ink placeholder:text-mist;
+}
+@utility label {
+  @apply block text-[11px] font-display uppercase tracking-[0.18em] text-slate mb-1.5;
+}
+@utility eyebrow {
+  @apply font-display text-[11px] uppercase tracking-[0.28em] text-gold;
+}
+@utility rule-gold {
+  @apply h-px w-14 bg-gold;
+}
+@utility lede {
+  @apply text-lg leading-relaxed tracking-[0.02em] font-light;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+}
