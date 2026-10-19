@@ -357,7 +357,7 @@ export default async function ServiceRequestDetailPage({
                     </option>
                     {VISIT_OUTCOMES.map((o) => (
                       <option key={o} value={o}>
-                        {o}
+                        {o === "Resolved" ? "Resolved — closes the ticket" : o}
                       </option>
                     ))}
                   </select>

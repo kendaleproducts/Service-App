@@ -996,7 +996,11 @@ export function listVisitsForRequest(serviceRequestId: number): ServiceVisitWith
     .all(serviceRequestId) as ServiceVisitWithCompany[];
 }
 
-/** Logs a visit and moves an open request's status to match the outcome. */
+/**
+ * Logs a visit and moves an open request's status to match the outcome.
+ * A "Resolved" visit closes the ticket outright: the visit's work performed
+ * becomes the resolution and the visit date the completion date.
+ */
 export const addVisit = db.transaction(
   (input: {
     service_request_id: number;
@@ -1012,6 +1016,19 @@ export const addVisit = db.transaction(
         (service_request_id, service_company_id, visited_on, work_performed, outcome, amount, invoice_ref)
        VALUES (@service_request_id, @service_company_id, @visited_on, @work_performed, @outcome, @amount, @invoice_ref)`
     ).run(input);
+    if (input.outcome === "Resolved") {
+      db.prepare(
+        `UPDATE service_requests
+         SET status = 'Completed', completed_at = @visited_on, resolution = @resolution,
+             updated_at = datetime('now')
+         WHERE id = @id AND status NOT IN ('Completed', 'Cancelled')`
+      ).run({
+        id: input.service_request_id,
+        visited_on: input.visited_on,
+        resolution: input.work_performed,
+      });
+      return;
+    }
     const status = input.outcome === "Awaiting parts" ? "Awaiting Parts" : "In Progress";
     db.prepare(
       `UPDATE service_requests SET status = ?, updated_at = datetime('now')

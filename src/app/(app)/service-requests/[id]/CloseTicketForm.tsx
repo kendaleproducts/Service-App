@@ -18,7 +18,8 @@ export default function CloseTicketForm({
       <div>
         <h2 className="font-medium text-charcoal">Close Ticket</h2>
         <p className="text-xs text-stone-500 mt-0.5">
-          Once the problem is solved. Summarize what fixed it — this goes on the printed ticket.
+          A visit logged as Resolved closes the ticket on its own. Use this to close one without a
+          final visit (e.g. the store sorted it out). The summary goes on the printed ticket.
         </p>
       </div>
       <textarea
